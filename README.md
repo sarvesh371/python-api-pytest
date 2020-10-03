@@ -2,7 +2,8 @@
 This is a framework repo for api automation using python with pytest
 
 **Pre Requisites**
-1. Before starting the tests perform the steps mentioned in https://github.com/digitalorigin/pg-qa-assignment#feature-2-test-automation-of-a-json-api to start the service in localhost
+1. Download and setup python 3 from : https://www.python.org/downloads/
+2. Before starting the tests perform the steps mentioned in https://github.com/digitalorigin/pg-qa-assignment#feature-2-test-automation-of-a-json-api to start the service in localhost
 
 **Setup the framework and requirements and execute Test**
 1. `cd python-api-pytest`
