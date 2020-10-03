@@ -6,13 +6,17 @@ This is a framework repo for api automation using python with pytest
 2. Before starting the tests perform the steps mentioned in https://github.com/digitalorigin/pg-qa-assignment#feature-2-test-automation-of-a-json-api to start the service in localhost
 
 **Setup the framework and requirements and execute Test**
-1. `cd python-api-pytest`
+1. Go to project directory 
+    
+    `cd python-api-pytest`
 2. Run venv_setup.sh if you are mac or change the commands according to your os for setting up venv and downloading packages
     
     `sh venv_setup.sh`
 
 3. Select the interpreter by going into preferences (No need if you are going to run tests from terminal)
-4. `source venv/bin/activate`
+4. Activate the virtual environment 
+    
+    `source venv/bin/activate`
 5. Run test using pytest command and tests directory
 
     `pytest tests`
