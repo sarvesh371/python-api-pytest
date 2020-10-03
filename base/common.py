@@ -1,8 +1,6 @@
 __author__ = "sarvesh.singh"
 
 import os
-import logging
-import sys
 from urllib.parse import urlparse, urlunparse
 import re
 import requests
@@ -10,28 +8,10 @@ from pathlib import Path
 from json import (
     dumps as json_dumps,
     load as json_load,
+    loads as json_loads,
 )
 from types import SimpleNamespace as Namespace
 import allure
-import logging.handlers
-
-
-def basic_logging(name="BASIC", level=None):
-    """
-    Basic Logger to log in a file
-    :param name
-    :param level
-    """
-    if level is None:
-        level = os.environ.get("LOG_LEVEL", "INFO")
-    root = logging.getLogger(name=name)
-    root.setLevel(getattr(logging, level))
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(getattr(logging, level))
-    formatter = logging.Formatter("%(levelname)s :: %(message)s")
-    handler.setFormatter(formatter)
-    root.addHandler(handler)
-    return root
 
 
 def urljoin(*args):
@@ -113,7 +93,12 @@ def send_get_request(url, headers=None, params=None, timeout=None):
         response = requests.request(
             "GET", url, headers=headers, params=params, verify=False
         )
-    return response
+    content = response.content.decode("utf-8")
+    if isinstance(content, dict):
+        nt = json_loads(json_dumps(content))
+    else:
+        nt = json_loads(content)
+    return nt
 
 
 def send_post_request(url, data, headers, params=None):
@@ -128,7 +113,12 @@ def send_post_request(url, data, headers, params=None):
     response = requests.request(
         "POST", url, data=data, headers=headers, params=params, verify=False
     )
-    return response
+    content = response.content.decode("utf-8")
+    if isinstance(content, dict):
+        nt = json_loads(json_dumps(content))
+    else:
+        nt = json_loads(content)
+    return nt
 
 
 def send_delete_request(url, headers, params=None):
@@ -142,7 +132,12 @@ def send_delete_request(url, headers, params=None):
     response = requests.request(
         "DELETE", url, headers=headers, params=params, verify=False
     )
-    return response
+    content = response.content.decode("utf-8")
+    if isinstance(content, dict):
+        nt = json_loads(json_dumps(content))
+    else:
+        nt = json_loads(content)
+    return nt
 
 
 def save_allure(data, name, save_dump=True):

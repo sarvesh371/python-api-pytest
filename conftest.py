@@ -5,64 +5,6 @@ import os
 import pytest
 
 
-def pytest_addoption(parser):
-    """
-    Adds custom command line options for running the pytest harness
-    All options will be stored in pytest config
-    :param parser:
-    :return:
-    """
-    parser.addoption("--url", action="store", default=None, help="URL")
-
-
-def pytest_sessionstart(session):
-    """
-    Hook to be executed before session starts and before collection
-    :param session:
-    :return:
-    """
-    pass
-
-
-def pytest_sessionfinish(session, exitstatus):
-    """
-    Hook to be executed after tests execution and session is about to end
-    :param session:
-    :param exitstatus:
-    :return:
-    """
-    pass
-
-
-def pytest_report_teststatus(report, config):
-    """
-    Hook for Test Status Report
-    :param report:
-    :param config:
-    :return:
-    """
-    pass
-
-
-def pytest_internalerror(excrepr, excinfo):
-    """
-    Hook if there is any internal error
-    :param excrepr:
-    :param excinfo:
-    :return:
-    """
-    pass
-
-
-def pytest_keyboard_interrupt(excinfo):
-    """
-    Hook Called when there is a Keyboard Interrupt
-    :param excinfo:
-    :return:
-    """
-    pass
-
-
 def pytest_configure(config):
     """
     Configuration changes for PyTest
@@ -99,55 +41,6 @@ def pytest_configure(config):
         config.option.xmlpath = f"report.xml"
 
 
-def pytest_runtest_setup(item):
-    """
-    Runs Before pytest_runtest_call
-    :param item:
-    """
-    pass
-
-
-def pytest_runtest_call(item):
-    """
-    Called to execute the Test item
-    :param item:
-    :param nextitem:
-    """
-    pass
-
-
-def pytest_runtest_teardown(item, nextitem):
-    """
-    Runs after pytest_runtest_call
-    :param item:
-    :param nextitem:
-    """
-    pass
-
-
-@pytest.hookimpl(trylast=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    """
-    This is a run into the report generated after a test case
-    is done executing
-    :param item:
-    :param call:
-    :return:
-    """
-    outcome = yield
-    report = outcome.get_result()
-
-
-@pytest.fixture(autouse=True, scope="session")
-def tear_down_fixture(request):
-    """
-    Teardown Fixture
-    :param request:
-    :return:
-    """
-    yield
-
-
 @pytest.fixture(autouse=True, scope="session")
 def resources():
     """
@@ -155,3 +48,13 @@ def resources():
     :return:
     """
     return get_resource_config()
+
+
+@pytest.fixture(autouse=True, scope="session")
+def test_data():
+    """
+    Create a dict and write every test data there
+    :return:
+    """
+    test_data = dict()
+    return test_data

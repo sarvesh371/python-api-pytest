@@ -1,7 +1,8 @@
 {
-  "baseUrl": "localhost:3000",
+  "baseUrl": "http://localhost:3000",
   "heroesList": "/heroes",
   "hero": "/heroes/{}",
   "addHero": "/fight/addHero",
-  "fight": "/fight"
+  "fight": "/fight",
+  "token": "bearer pag4nt1stoken"
 }
