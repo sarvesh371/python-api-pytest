@@ -86,14 +86,12 @@ def send_get_request(url, headers=None, params=None, timeout=None):
     :return:
     """
     if timeout:
-        response = requests.request(
-            "GET", url, headers=headers, params=params, timeout=timeout, verify=False
-        )
+        response = requests.get(url=url, headers=headers, params=params, timeout=timeout)
     else:
-        response = requests.request(
-            "GET", url, headers=headers, params=params, verify=False
-        )
-    content = response.content.decode("utf-8")
+        response = requests.get(url=url, headers=headers, params=params)
+    if response.status_code not in [200, 201]:
+        raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
+    content = response.content.decode(response.encoding)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
@@ -101,19 +99,19 @@ def send_get_request(url, headers=None, params=None, timeout=None):
     return nt
 
 
-def send_post_request(url, data, headers, params=None):
+def send_post_request(url, json, headers, params=None):
     """
     Send simple Post Request
     :param url:
-    :param data:
+    :param json:
     :param headers:
     :param params:
     :return:
     """
-    response = requests.request(
-        "POST", url, data=data, headers=headers, params=params, verify=False
-    )
-    content = response.content.decode("utf-8")
+    response = requests.post(url=url, json=json, headers=headers, params=params)
+    if response.status_code not in [200, 201]:
+        raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
+    content = response.content.decode(response.encoding)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
@@ -129,10 +127,10 @@ def send_delete_request(url, headers, params=None):
     :param params:
     :return:
     """
-    response = requests.request(
-        "DELETE", url, headers=headers, params=params, verify=False
-    )
-    content = response.content.decode("utf-8")
+    response = requests.delete(url=url, headers=headers, params=params)
+    if response.status_code not in [200, 201]:
+        raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
+    content = response.content.decode(response.encoding)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
