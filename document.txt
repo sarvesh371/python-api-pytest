@@ -44,14 +44,23 @@
     Solution: In the doc it is not mentioned that this route needs a authorization. Used the token with bearer which we got after login and was able to fix this issue
     You will see this test case in automation
 
-    Issue 3: Getting 500 internal server error after using fresh bearer token
+    Issue 3: Getting 400 Bad request error after using fresh bearer token
         {
-            "status": "error",
-            "data": {},
-            "message": "Not logged in!"
-        }
+        "status": "error",
+        "data": {
+            "code": "ER_NO_DEFAULT_FOR_FIELD",
+            "errno": 1364,
+            "sqlMessage": "Field 'employee_name' doesn't have a default value",
+            "sqlState": "HY000",
+            "index": 0,
+            "sql": "insert into `employees` (`company_id`, `created_at`, `employee_email`, `id`, `updated_at`, `user_id`) values (21, '2020-10-11 14:24:02', 'sarvesh.singh811987226787656222@thinxnet.com', 225111, '2020-10-11 14:24:02', 36)"
+        },
+        "message": "Somethign went wrong! Please try again later"
+    }
 
-    Solution : According to docs the request body contains email and password but I Debugged the code/employeeControllers and found there is some more field which needs to be sent to create employee
+    Solution : You have to follow the below shared rules while creating employee and sharing a sample request below
+    1. While creating employee the employee_email has to be unique so you do not get the Duplicate user_email issue
+    2. You have to pass employee_name field while creating employee to avoid default value not found error for employee_name
         {
             "profile": {
                 "role": "admin",
@@ -61,21 +70,16 @@
                 "password": "Yellow*99"
             }
         }
-        Note : While creating employee the employee_email has to be unique so you do not get the Duplicate user_email issue
-        Note: You have to pass employee_name field while creating employee to avoid default value not found error for employee_name
         Now we are able to create employee with this correct request body, So i will show this error in automation first and then will create employee with correct request body
         You will see this test case in automation
-
 
 8. Automating Edit profile
 
     We need to login with the employee credentials and use that toke to get the profile
     You will see this test case in automation
 
-    Issue 1: There is no route available for edit profile in route.js hence we cannot update employee profle and thus api is giving 204.
+    Issue 1: There is no route available for edit profile in route.js hence we cannot update employee profile and thus api is giving 204.
     You will see this test case in automation
-
-
 
 
 
