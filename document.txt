@@ -1,0 +1,73 @@
+1. Installed the dependencies to run the service
+2. cd api
+3. Got issue while Starting the  service itself which are mentioned below with solution i did:
+    A. running "node adonis migration:run"
+        Error: ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol requested by server; consider upgrading MySQL client
+
+        Solution
+        on Terminal
+        sudo mysql
+        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'HoldOn#6!';
+        FLUSH PRIVILEGES;
+        quit
+
+    B. After 3 got this issue
+        Error: ER_BAD_DB_ERROR: Unknown database 'adonis'
+
+        Solution
+        mysql -u root -p
+        HoldOn#6!
+        CREATE DATABASE adonis;
+        quit
+
+    C. The read me file does not contains command to start the node service
+
+        Solution
+        npm start
+
+4. Automating "/api/v1/register"
+
+    Issue 1 : While putting string value in "company_account_status:" as mentioned in docs we are getting error that it is an int type
+    Solution : enter Int value in "company_account_status"
+
+5. Automating "/api/v1/login"
+
+   NO issue found in api with relates to API doc
+
+6. Automating "/api/v1/users/create"
+
+    Issue 1 : In doc it is mentioned that the route is "/api/v1/users/create" when we use this we are getting 404 not found that means this endpoint does not exist
+    Solution: Check Route.js and there we can see correct route is "employees/create"
+
+    Issue 2 : After solving issue 1 we are getting 401 unauthorized while hitting request
+    Solution: In the doc it is not mentioned that this route needs a authorization. Used the token with bearer which we got after login and was able to fix this issue
+
+    Issue 3: Getting 500 internal server error after using fresh bearer token
+        {
+            "status": "error",
+            "data": {},
+            "message": "Not logged in!"
+        }
+
+    Solution : According to docs the request body contains email and password but I Debugged the code/employeeControllers and found there is some more field which needs to be sent to create employee
+        {
+            "profile": {
+                "role": "admin",
+                "id": 10,
+                "employee_email": "sarvesh.singh6@thinxnet.com",
+                "employee_name": "Sarvesh",
+                "password": "Yellow*99"
+            }
+        }
+        Note : While creating employee the employee_email has to be unique so you do not get the Duplicate user_email issue
+        Now we are able to create employee with this correct request body, So i will show this error in automation first and then will create employee with correct request body
+
+
+7. We can verify our employee creation got success with GET employees API
+
+8. Automating "/api/v1/users/create"
+
+
+
+
+
