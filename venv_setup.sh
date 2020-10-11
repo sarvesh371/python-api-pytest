@@ -1,6 +1,3 @@
-export PYCURL_SSL_LIBRARY=openssl
-export LDFLAGS='-L/usr/local/opt/openssl@1.1/lib -L/usr/local/opt/readline/lib -Wl,-dead_strip_dylibs'
-export CPPFLAGS='-I/usr/local/opt/openssl@1.1/include'
 export PYTHONHTTPSVERIFY=0
 export PYTHON_VENV=venv
 rm -rf $PYTHON_VENV

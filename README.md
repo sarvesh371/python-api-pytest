@@ -20,6 +20,11 @@ This is a framework repo for api automation using python with pytest
 5. Run test using pytest command and tests directory
 
     `pytest tests`
+6. Get Allure report by running
+
+    a. run `allure serve` to get the allure report on localhost
+
+    b. run `allure generate` to generate a allure report and it will be saved under /allure-report
 
 **Project Structure**
 1. base - It contains all the common functions and workers functions
