@@ -73,7 +73,7 @@
         Now we are able to create employee with this correct request body, So i will show this error in automation first and then will create employee with correct request body
         You will see this test case in automation
 
-8. Automating Edit profile
+7. Automating Edit profile
 
     We need to login with the employee credentials and use that toke to get the profile
     You will see this test case in automation
