@@ -13,7 +13,6 @@ from json import (
 from types import SimpleNamespace as Namespace
 import allure
 import random
-
 from faker import Faker
 
 
