@@ -1,6 +1,6 @@
 1. Installed the dependencies to run the service
 2. cd api
-3. Got issue while Starting the  service itself which are mentioned below with solution i did:
+3. Got issue while Starting the service itself which are mentioned below with solution i did:
     A. running "node adonis migration:run"
         Error: ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol requested by server; consider upgrading MySQL client
 
@@ -27,12 +27,13 @@
 
 4. Automating "/api/v1/register"
 
-    Issue 1 : While putting string value in "company_account_status:" as mentioned in docs we are getting error that it is an int type
-    Solution : enter Int value in "company_account_status"
+    NO issue found in api with relates to API doc
+    You will see this test case in automation
 
 5. Automating "/api/v1/login"
 
    NO issue found in api with relates to API doc
+   You will see this test case in automation
 
 6. Automating "/api/v1/users/create"
 
@@ -41,6 +42,7 @@
 
     Issue 2 : After solving issue 1 we are getting 401 unauthorized while hitting request
     Solution: In the doc it is not mentioned that this route needs a authorization. Used the token with bearer which we got after login and was able to fix this issue
+    You will see this test case in automation
 
     Issue 3: Getting 500 internal server error after using fresh bearer token
         {
@@ -60,12 +62,18 @@
             }
         }
         Note : While creating employee the employee_email has to be unique so you do not get the Duplicate user_email issue
+        Note: You have to pass employee_name field while creating employee to avoid default value not found error for employee_name
         Now we are able to create employee with this correct request body, So i will show this error in automation first and then will create employee with correct request body
+        You will see this test case in automation
 
 
-7. We can verify our employee creation got success with GET employees API
+8. Automating Edit profile
 
-8. Automating "/api/v1/users/create"
+    We need to login with the employee credentials and use that toke to get the profile
+    You will see this test case in automation
+
+    Issue 1: There is no route available for edit profile in route.js hence we cannot update employee profle and thus api is giving 204.
+    You will see this test case in automation
 
 
 
