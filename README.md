@@ -20,17 +20,21 @@ This is a framework repo for api automation using python with pytest
 5. Run test using pytest command and tests directory
 
     `pytest tests`
-    
-6. Get Allure report by running 
+6. Get Allure report by running
 
     a. run `allure serve` to get the allure report on localhost
-    
+
     b. run `allure generate` to generate a allure report and it will be saved under /allure-report
 
 **Project Structure**
 1. base - It contains all the common functions and workers functions
 2. resources - It contains all url configurations which will be used throughout the project
 3. tests - It contains the test class which needs to be triggered
-4. allure-results - folder to save our allure report
-5. conftest - as it is heart of pytest, we will keep only fixture and pytest methods there
-6. requirements.txt - we will write all our dependency there and then download in one shot using `venv_setup.sh`
+5. allure-results - folder to save our allure report
+    
+    a. run `allure serve` to get the allure report on localhost
+    
+    b. run `allure generate` to generate a allure report and it will be saved under /allure-report
+
+7. conftest - as it is heart of pytest, we will keep only fixture and pytest methods there
+8. requirements.txt - we will write all our dependency there and then download in one shot using `venv_setup.sh`
