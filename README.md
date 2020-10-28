@@ -3,7 +3,7 @@ This is a framework repo for api automation using python with pytest
 
 **Pre Requisites**
 1. Download and setup python3 from : https://www.python.org/downloads/
-2. Before starting the tests perform the steps mentioned in Read me file of API project to start the service
+2. Before starting the tests perform the steps mentioned in https://github.com/sarvesh371/node-api-service#feature-2-test-automation-of-a-json-api to start the service in localhost
 
 **Setup the framework and requirements and execute Test**
 1. Go to project directory 
