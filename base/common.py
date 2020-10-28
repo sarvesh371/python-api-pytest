@@ -12,6 +12,8 @@ from json import (
 )
 from types import SimpleNamespace as Namespace
 import allure
+import random
+from faker import Faker
 
 
 def urljoin(*args):
@@ -99,16 +101,38 @@ def send_get_request(url, headers=None, params=None, timeout=None):
     return nt
 
 
-def send_post_request(url, json, headers, params=None):
+def send_post_request(url, headers, json=None, data=None, params=None):
     """
     Send simple Post Request
     :param url:
     :param json:
     :param headers:
+    :param data:
     :param params:
     :return:
     """
-    response = requests.post(url=url, json=json, headers=headers, params=params)
+    response = requests.post(url=url, json=json, data=data, headers=headers, params=params)
+    if response.status_code not in [200, 201]:
+        raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
+    content = response.content.decode(response.encoding)
+    if isinstance(content, dict):
+        nt = json_loads(json_dumps(content))
+    else:
+        nt = json_loads(content)
+    return nt
+
+
+def send_put_request(url, headers, json=None, data=None, params=None):
+    """
+    Send simple Put Request
+    :param url:
+    :param json:
+    :param headers:
+    :param data:
+    :param params:
+    :return:
+    """
+    response = requests.put(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode(response.encoding)
@@ -162,3 +186,24 @@ def save_allure(data, name, save_dump=True):
                 with open(name, "w") as _fp:
                     _fp.write(dump)
             return dump
+
+
+def generate_phone_number(max_digits=10):
+    """
+    Function to generate phone number
+    :param max_digits:
+    :return:
+    """
+    return random.randint(10 ** (max_digits - 1), 10 ** max_digits - 1)
+
+
+def generate_email_id(**kwargs):
+    """
+    Function to generate Email ID
+    :return:
+    """
+    tail = f"_{str(generate_phone_number(6))}@thinxnet.com"
+    email_id = re.sub(
+        r"(.*?)@.*", r"\1{}".format(tail), str(Faker().email()), re.I | re.M
+    )
+    return str(email_id).lower()
