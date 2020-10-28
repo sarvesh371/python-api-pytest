@@ -1,8 +1,8 @@
 {
-  "baseUrl": "http://127.0.0.1:3333/api/v1",
-  "register": "register",
-  "login": "login",
-  "createEmployee": "employees/create",
-  "profile": "my-profile",
-  "updateProfile": "employees/{}"
+  "baseUrl": "http://localhost:3000",
+  "heroesList": "/heroes",
+  "hero": "/heroes/{}",
+  "addHero": "/fight/addHero",
+  "fight": "/fight",
+  "token": "bearer pag4nt1stoken"
 }
