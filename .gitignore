@@ -131,3 +131,4 @@ dmypy.json
 /report.xml
 /allure-results/
 /allure-report/
+.idea/

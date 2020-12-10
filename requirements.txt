@@ -110,7 +110,7 @@ keyring==21.4.0
 kibana==0.7
 kiwisolver==1.2.0
 kubernetes==11.0.0
-lazy-object-proxy==1.5.1
+lazy-object-proxy==1.4.3
 libcst==0.3.10
 locust==1.2.3
 lxml==4.5.2
@@ -137,10 +137,10 @@ openapi3==1.0.1
 openpyxl==3.0.5
 ordered-set==4.0.2
 packaging==20.4
-pandas==1.1.1
+pandas==1.1.5
 pandocfilters==1.4.2
 paramiko==2.7.2
-parso==0.8.0
+parso==0.7.1
 pathlib2==2.3.5
 pathspec==0.8.0
 pbr==5.4.5
