@@ -38,7 +38,6 @@ packaging==20.4
 parso==0.7.1
 pathlib2==2.3.5
 pathspec==0.8.0
-Pillow==7.2.0
 pip-review==1.1.0
 pip-upgrader==1.4.15
 pipenv==2020.8.13
@@ -48,7 +47,6 @@ psycopg2==2.8.5
 psycopg2-binary==2.8.5
 py==1.9.0
 pycparser==2.20
-pycrypto==2.6.1
 PyJWT==1.7.1
 pylint==2.6.0
 pyOpenSSL==19.1.0
@@ -89,9 +87,9 @@ urllib3==1.25.10
 uuid==1.30
 virtualenv==20.0.31
 virtualenv-clone==0.5.4
+xerox==0.4.1
 xlrd==1.2.0
 XlsxWriter==1.3.3
 xlwt==1.3.0
 xmltodict==0.12.0
 yamllint==1.24.2
-yarl==1.5.1
