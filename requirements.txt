@@ -68,7 +68,6 @@ python-dateutil==2.8.1
 python-dotenv==0.14.0
 python-jenkins==1.7.0
 pytz==2020.1
-pywin32
 PyYAML==5.3.1
 QtPy==1.9.0
 readme-renderer==26.0
