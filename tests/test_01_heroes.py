@@ -1,7 +1,7 @@
 __author__ = "sarvesh.singh"
 
 import pytest
-from base.common import *
+from base.common import urljoin, send_get_request, is_key_there_in_dict, send_post_request, send_delete_request
 
 
 @pytest.mark.HEROES
@@ -23,7 +23,6 @@ class TestHeroes:
             'Authorization': resources.token
         }
         response = send_get_request(url, headers=headers)
-        save_allure(data=response, name='getHeroes', save_dump=False)
         assert len(response) != 0, 'No heroes returned !!'
         test_data['heroes'] = []
         # To check the keys of API's
@@ -45,7 +44,6 @@ class TestHeroes:
             'Authorization': resources.token
         }
         response = send_get_request(url, headers=headers)
-        save_allure(data=response, name='getHero', save_dump=False)
         is_key_there_in_dict('id', response)
         assert len(response) != 0, 'Hero not Found !!'
         assert response['id'] == test_data['heroes'][0]['id'], 'Hero Id mismatch !!'
@@ -65,7 +63,6 @@ class TestHeroes:
             "heroId": test_data['heroes'][0]['id'],
         }
         response = send_post_request(url, json=body, headers=headers)
-        save_allure(data=response, name='addFirstHero', save_dump=False)
         is_key_there_in_dict('message', response)
         if 'Yippie!' not in response['message']:
             raise Exception(f"{test_data['heroes'][0]['name']} did not get added !!")
@@ -85,18 +82,12 @@ class TestHeroes:
         body = {
             "heroId": test_data['heroes'][0]['id'],
         }
-        try:
-            response = send_post_request(url, json=body, headers=headers)
-            save_allure(data=response, name='addFirstHero', save_dump=False)
-            is_key_there_in_dict('errorCode', response)
-            is_key_there_in_dict('error', response)
-            assert response['errorCode'] == '1001', 'Error Code Mis Match !!'
-            assert response[
-                       'error'] == 'Thor could not be added because is already in the fight.', 'Same Hero added Twice !!'
-        except Exception as exp:
-            assert exp.args[
-                       0] == '''Status code is : 400 | Error : {"errorCode":"1001","error":"Thor could not be added because is already in the fight."}''', 'Same Hero got added Twice !!'
-            save_allure(data=exp.args[0], name='addFirstHeroAgain', save_dump=False)
+        response = send_post_request(url, json=body, headers=headers)
+        is_key_there_in_dict('errorCode', response)
+        is_key_there_in_dict('error', response)
+        assert response['errorCode'] == '1001', 'Error Code Mis Match !!'
+        assert response[
+                   'error'] == 'Thor could not be added because is already in the fight.', 'Same Hero added Twice !!'
 
     def test_05_start_fight(self, resources):
         """
@@ -108,18 +99,12 @@ class TestHeroes:
         headers = {
             'Authorization': resources.token
         }
-        try:
-            response = send_post_request(url, json=None, headers=headers)
-            save_allure(data=response, name='startFight', save_dump=False)
-            is_key_there_in_dict('errorCode', response)
-            is_key_there_in_dict('error', response)
-            assert response['errorCode'] == '1004', 'Error Code Mis Match !!'
-            assert response[
-                       'error'] == 'You can not start a fight with less than 2 heroes', 'Fight started with only 1 hero !!'
-        except Exception as exp:
-            assert exp.args[
-                       0] == '''Status code is : 400 | Error : {"errorCode":"1004","error":"You can not start a fight with less than 2 heroes"}''', 'Fight started without two heroes !!'
-            save_allure(data=exp.args[0], name='startFight', save_dump=False)
+        response = send_post_request(url, json=None, headers=headers)
+        is_key_there_in_dict('errorCode', response)
+        is_key_there_in_dict('error', response)
+        assert response['errorCode'] == '1004', 'Error Code Mis Match !!'
+        assert response[
+                   'error'] == 'You can not start a fight with less than 2 heroes', 'Fight started with only 1 hero !!'
 
     def test_06_add_second_hero_fight(self, resources, test_data):
         """
@@ -136,7 +121,6 @@ class TestHeroes:
             "heroId": test_data['heroes'][1]['id'],
         }
         response = send_post_request(url, json=body, headers=headers)
-        save_allure(data=response, name='addSecondHero', save_dump=False)
         is_key_there_in_dict('message', response)
         if 'Yippie!' not in response['message']:
             raise Exception(f"{test_data['heroes'][1]['name']} did not get added !!")
@@ -152,7 +136,6 @@ class TestHeroes:
             'Authorization': resources.token
         }
         response = send_post_request(url, json=None, headers=headers)
-        save_allure(data=response, name='startFightAgain', save_dump=False)
 
     def test_08_reset_fight(self, resources):
         """
@@ -165,7 +148,6 @@ class TestHeroes:
             'Authorization': resources.token
         }
         response = send_delete_request(url, headers=headers)
-        save_allure(data=response, name='resetFight', save_dump=False)
         is_key_there_in_dict('message', response)
         assert response[
                    'message'] == 'Fight has been deleted and now all heroes went back to Helicarrier Ship.', 'Fight is not reset !!'
