@@ -98,10 +98,10 @@ def send_get_request(url, headers=None, params=None, timeout=None):
     else:
         response = requests.get(url=url, headers=headers, params=params)
     if response.status_code not in [200, 201]:
-        save_allure(data=response.content.decode(response.encoding), name='failResponse', save_dump=False)
+        save_allure(data=response.content.decode(response.encoding), name='failResponse.json', save_dump=False)
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode(response.encoding)
-    save_allure(data=content, name='passResponse', save_dump=False)
+    save_allure(data=content, name='passResponse.json', save_dump=False)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
@@ -125,10 +125,10 @@ def send_post_request(url, headers, json=None, data=None, params=None):
     allure.attach(command, name=name, attachment_type=allure.attachment_type.TEXT)
     response = requests.post(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
-        save_allure(data=response.content.decode(response.encoding), name='failResponse', save_dump=False)
+        save_allure(data=response.content.decode(response.encoding), name='failResponse.json', save_dump=False)
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode(response.encoding)
-    save_allure(data=content, name='passResponse', save_dump=False)
+    save_allure(data=content, name='passResponse.json', save_dump=False)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
@@ -152,10 +152,10 @@ def send_put_request(url, headers, json=None, data=None, params=None):
     allure.attach(command, name=name, attachment_type=allure.attachment_type.TEXT)
     response = requests.put(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
-        save_allure(data=response.content.decode(response.encoding), name='failResponse', save_dump=False)
+        save_allure(data=response.content.decode(response.encoding), name='failResponse.json', save_dump=False)
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode(response.encoding)
-    save_allure(data=content, name='passResponse', save_dump=False)
+    save_allure(data=content, name='passResponse.json', save_dump=False)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
@@ -177,10 +177,10 @@ def send_delete_request(url, headers, params=None):
     allure.attach(command, name=name, attachment_type=allure.attachment_type.TEXT)
     response = requests.delete(url=url, headers=headers, params=params)
     if response.status_code not in [200, 201]:
-        save_allure(data=response.content.decode(response.encoding), name='failResponse', save_dump=False)
+        save_allure(data=response.content.decode(response.encoding), name='failResponse.json', save_dump=False)
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode(response.encoding)
-    save_allure(data=content, name='passResponse', save_dump=False)
+    save_allure(data=content, name='passResponse.json', save_dump=False)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
