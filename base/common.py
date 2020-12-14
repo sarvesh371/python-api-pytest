@@ -51,8 +51,8 @@ def get_resource_config():
     """
     Function to Read URL resource config File
     """
-    data = Path(__file__).parent.parent / "resources/config.json"
-    return read_json_file(data, nt=True)
+    path = Path(__file__).parent.parent / "resources/config.json"
+    return read_json_file(path, nt=True)
 
 
 def is_key_there_in_dict(key, dictionary, empty_check=True, text=None):

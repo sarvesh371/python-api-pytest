@@ -1,8 +1,9 @@
 __author__ = "sarvesh.singh"
 
-from base.common import get_resource_config
+from base.common import get_resource_config, read_json_file
 import os
 import pytest
+from pathlib import Path
 
 
 def pytest_configure(config):
@@ -58,3 +59,21 @@ def test_data():
     """
     test_data = dict()
     return test_data
+
+
+@pytest.fixture(autouse=True, scope="session")
+def tear_down_fixture(test_data):
+    """
+    Tear down fixture
+    :param test_data: Test Data Fixture
+    """
+    yield
+    test_data['summary'] = dict()
+    test_data['summary']['status'] = 'Pass'
+    path = Path(__file__).parent / "report.json"
+    report = read_json_file(path, nt=True)
+    test_data['summary']['total'] = report.summary.collected
+    test_data['summary']['failed'] = report.summary.failed
+    test_data['summary']['passed'] = report.summary.total - report.summary.failed
+    if bool(test_data['summary']['failed']):
+        test_data['summary']['status'] = 'Fail'
