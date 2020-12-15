@@ -228,7 +228,7 @@ def generate_email_id(**kwargs):
     Function to generate Email ID
     :return:
     """
-    tail = f"_{str(generate_phone_number(6))}@thinxnet.com"
+    tail = f"_{str(generate_phone_number(6))}@sample.com"
     email_id = re.sub(
         r"(.*?)@.*", r"\1{}".format(tail), str(Faker().email()), re.I | re.M
     )

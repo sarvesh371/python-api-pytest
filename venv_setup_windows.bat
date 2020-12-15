@@ -1,4 +1,3 @@
-set PYTHONHTTPSVERIFY=0
 del /f /s /q venv 1>nul
 rmdir /s /q venv
 python -m pip install virtualenv
