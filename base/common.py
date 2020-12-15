@@ -9,8 +9,10 @@ from json import (
     dumps as json_dumps,
     load as json_load,
     loads as json_loads,
+    JSONDecodeError,
 )
 from types import SimpleNamespace as Namespace
+from collections import namedtuple
 import allure
 import random
 from faker import Faker
@@ -267,3 +269,33 @@ def create_curl_command(method, headers, url, params=None, data=None):
     # We always save Curl Command in environment variable, so that we know (in-case) of an exception what was it.
     os.environ["CURL"] = command
     return command
+
+
+def read_sample_json():
+    """
+    This function read all .json file in test-data and return json in format of this {file_name: file_Json} .
+    :return:
+    """
+    _json_files = []
+    directory = "test-data"
+    for root, dirs, file in os.walk(directory):
+        for filename in file:
+            if filename.endswith(".json"):
+                _json_files.append(os.path.join(root, filename))
+
+    if len(_json_files) != 0:
+        final_data = {}
+        for _file in _json_files:
+            with open(_file, "r") as _fp:
+                try:
+                    _file_content = json_load(_fp)
+                except (Exception, JSONDecodeError) as exp:
+                    raise Exception(f"Cannot Read File {_file} !!")
+            final_data.update(
+                {os.path.basename(_file).split(".json")[0]: _file_content}
+            )
+        json_files = namedtuple("MyTuple", final_data)
+        files = json_files(**final_data)
+        return files
+    else:
+        raise Exception("There's no Json File in {directory} !!")

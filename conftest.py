@@ -1,6 +1,6 @@
 __author__ = "sarvesh.singh"
 
-from base.common import get_resource_config, read_json_file
+from base.common import get_resource_config, read_json_file, read_sample_json
 import os
 import pytest
 from pathlib import Path
@@ -77,3 +77,13 @@ def tear_down_fixture(test_data):
     test_data['summary']['passed'] = report.summary.total - report.summary.failed
     if bool(test_data['summary']['failed']):
         test_data['summary']['status'] = 'Fail'
+
+
+@pytest.fixture(autouse=True, scope="session")
+def sample_json():
+    """
+    Fetch all sample json and convert it to name tuple .
+    :return:
+    """
+    json_data = read_sample_json()
+    return json_data
