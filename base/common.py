@@ -4,7 +4,6 @@ import os
 from urllib.parse import urlparse, urlunparse
 import re
 import requests
-from pathlib import Path
 from json import (
     dumps as json_dumps,
     load as json_load,
@@ -14,10 +13,10 @@ from json import (
 from types import SimpleNamespace as Namespace
 from collections import namedtuple
 import allure
-import random
-from faker import Faker
 from datetime import datetime
 import pytz
+import random
+from faker import Faker
 
 
 def urljoin(*args):
@@ -49,14 +48,6 @@ def read_json_file(file_name, nt=True):
     return data
 
 
-def get_resource_config():
-    """
-    Function to Read URL resource config File
-    """
-    path = Path(__file__).parent.parent / "resources/config.json"
-    return read_json_file(path, nt=True)
-
-
 def is_key_there_in_dict(key, dictionary, empty_check=True, text=None):
     """
     Check if key is there in dictionary
@@ -84,7 +75,7 @@ def is_key_there_in_dict(key, dictionary, empty_check=True, text=None):
 
 def send_get_request(url, headers=None, params=None, timeout=None):
     """
-    Send simple Post Request
+    Send simple GET Request
     :param url:
     :param headers:
     :param params:
@@ -94,15 +85,15 @@ def send_get_request(url, headers=None, params=None, timeout=None):
     now = datetime.now(pytz.timezone("Asia/Calcutta"))
     name = f"curlCmd_{now.minute}{now.second}{now.microsecond}.json"
     command = create_curl_command(method='GET', headers=headers, url=url, params=params)
-    allure.attach(command, name=name, attachment_type=allure.attachment_type.TEXT)
+    save_allure(data=command, name=name, save_dump=False)
     if timeout:
         response = requests.get(url=url, headers=headers, params=params, timeout=timeout)
     else:
         response = requests.get(url=url, headers=headers, params=params)
     if response.status_code not in [200, 201]:
-        save_allure(data=response.content.decode(response.encoding), name='failResponse.json', save_dump=False)
+        save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
-    content = response.content.decode(response.encoding)
+    content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
@@ -124,12 +115,12 @@ def send_post_request(url, headers, json=None, data=None, params=None):
     now = datetime.now(pytz.timezone("Asia/Calcutta"))
     name = f"curlCmd_{now.minute}{now.second}{now.microsecond}.json"
     command = create_curl_command(method='POST', headers=headers, url=url, params=params, data=json)
-    allure.attach(command, name=name, attachment_type=allure.attachment_type.TEXT)
+    save_allure(data=command, name=name, save_dump=False)
     response = requests.post(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
-        save_allure(data=response.content.decode(response.encoding), name='failResponse.json', save_dump=False)
+        save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
-    content = response.content.decode(response.encoding)
+    content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
@@ -151,12 +142,12 @@ def send_put_request(url, headers, json=None, data=None, params=None):
     now = datetime.now(pytz.timezone("Asia/Calcutta"))
     name = f"curlCmd_{now.minute}{now.second}{now.microsecond}.json"
     command = create_curl_command(method='PUT', headers=headers, url=url, params=params, data=json)
-    allure.attach(command, name=name, attachment_type=allure.attachment_type.TEXT)
+    save_allure(data=command, name=name, save_dump=False)
     response = requests.put(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
-        save_allure(data=response.content.decode(response.encoding), name='failResponse.json', save_dump=False)
+        save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
-    content = response.content.decode(response.encoding)
+    content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))
@@ -176,12 +167,12 @@ def send_delete_request(url, headers, params=None):
     now = datetime.now(pytz.timezone("Asia/Calcutta"))
     name = f"curlCmd_{now.minute}{now.second}{now.microsecond}.json"
     command = create_curl_command(method='DELETE', headers=headers, url=url, params=params)
-    allure.attach(command, name=name, attachment_type=allure.attachment_type.TEXT)
+    save_allure(data=command, name=name, save_dump=False)
     response = requests.delete(url=url, headers=headers, params=params)
     if response.status_code not in [200, 201]:
-        save_allure(data=response.content.decode(response.encoding), name='failResponse.json', save_dump=False)
+        save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
-    content = response.content.decode(response.encoding)
+    content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
     if isinstance(content, dict):
         nt = json_loads(json_dumps(content))

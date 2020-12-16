@@ -1,9 +1,18 @@
 __author__ = "sarvesh.singh"
 
-from base.common import get_resource_config, read_json_file, read_sample_json
+from base.common import read_json_file, read_sample_json
 import os
 import pytest
 from pathlib import Path
+
+
+def pytest_addoption(parser):
+    """
+    Adds custom command line options for running configurable code
+    :param parser:
+    :return:
+    """
+    parser.addoption("--base-url", action="store", default='http://localhost:3000', help="Base URL")
 
 
 def pytest_configure(config):
@@ -43,15 +52,19 @@ def pytest_configure(config):
 
 
 @pytest.fixture(autouse=True, scope="session")
-def resources():
+def config(request):
     """
-    resources Fixture with all Url
+    Create a dict() and save the configuration there
+    :param request
     :return:
     """
-    return get_resource_config()
+    config = {
+        'baseUrl': request.config.getoption("--base-url"),
+    }
+    return config
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(scope="session")
 def test_data():
     """
     Create a dict and write every test data there
@@ -61,7 +74,7 @@ def test_data():
     return test_data
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(scope="session")
 def tear_down_fixture(test_data):
     """
     Tear down fixture
@@ -79,7 +92,7 @@ def tear_down_fixture(test_data):
         test_data['summary']['status'] = 'Fail'
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(scope="session")
 def sample_json():
     """
     Fetch all sample json and convert it to name tuple .

@@ -11,16 +11,17 @@ class TestHeroes:
     This suite is created to test the fight and heroes flow
     """
 
-    def test_01_verify_and_get_heroes(self, resources, test_data):
+    def test_01_verify_and_get_heroes(self, config, test_data):
         """
         Get heroes and verify
-        :param resources
+        :param config
         :param test_data
         :return:
         """
-        url = urljoin(resources.baseUrl, resources.heroesList)
+        url = urljoin(config['baseUrl'], 'heroes')
+        test_data['token'] = 'bearer pag4nt1stoken'
         headers = {
-            'Authorization': resources.token
+            'Authorization': test_data['token']
         }
         response = send_get_request(url, headers=headers)
         assert len(response) != 0, 'No heroes returned !!'
@@ -32,32 +33,32 @@ class TestHeroes:
             is_key_there_in_dict('powerlevel', _hero)
             test_data['heroes'].append(_hero)
 
-    def test_02_verify_hero_api(self, resources, test_data):
+    def test_02_verify_hero_api(self, config, test_data):
         """
         Verify api to get one hero using hero id
-        :param resources
+        :param config
         :param test_data
         :return:
         """
-        url = urljoin(resources.baseUrl, resources.hero.format(test_data['heroes'][0]['id']))
+        url = urljoin(config['baseUrl'], 'heroes', test_data['heroes'][0]['id'])
         headers = {
-            'Authorization': resources.token
+            'Authorization': test_data['token']
         }
         response = send_get_request(url, headers=headers)
         is_key_there_in_dict('id', response)
         assert len(response) != 0, 'Hero not Found !!'
         assert response['id'] == test_data['heroes'][0]['id'], 'Hero Id mismatch !!'
 
-    def test_03_add_first_hero_fight(self, resources, test_data):
+    def test_03_add_first_hero_fight(self, config, test_data):
         """
         Add first hero to fight and try to add same hero twice
-        :param resources
+        :param config
         :param test_data
         :return:
         """
-        url = urljoin(resources.baseUrl, resources.addHero)
+        url = urljoin(config['baseUrl'], 'fight/addHero')
         headers = {
-            'Authorization': resources.token
+            'Authorization': test_data['token']
         }
         body = {
             "heroId": test_data['heroes'][0]['id'],
@@ -67,17 +68,17 @@ class TestHeroes:
         if 'Yippie!' not in response['message']:
             raise Exception(f"{test_data['heroes'][0]['name']} did not get added !!")
 
-    def test_04_add_first_hero_twice_fight(self, resources, test_data):
+    def test_04_add_first_hero_twice_fight(self, config, test_data):
         """
         Try to add same hero twice
-        :param resources
+        :param config
         :param test_data
         :return:
         """
         # To check what happens if we add same hero twice
-        url = urljoin(resources.baseUrl, resources.addHero)
+        url = urljoin(config['baseUrl'], 'fight/addHero')
         headers = {
-            'Authorization': resources.token
+            'Authorization': test_data['token']
         }
         body = {
             "heroId": test_data['heroes'][0]['id'],
@@ -89,15 +90,16 @@ class TestHeroes:
         assert response[
                    'error'] == 'Thor could not be added because is already in the fight.', 'Same Hero added Twice !!'
 
-    def test_05_start_fight(self, resources):
+    def test_05_start_fight(self, config, test_data):
         """
         Start fight with only 1 hero
-        :param resources
+        :param config
+        :param test_data
         :return:
         """
-        url = urljoin(resources.baseUrl, resources.fight)
+        url = urljoin(config['baseUrl'], 'fight')
         headers = {
-            'Authorization': resources.token
+            'Authorization': test_data['token']
         }
         response = send_post_request(url, json=None, headers=headers)
         is_key_there_in_dict('errorCode', response)
@@ -106,16 +108,16 @@ class TestHeroes:
         assert response[
                    'error'] == 'You can not start a fight with less than 2 heroes', 'Fight started with only 1 hero !!'
 
-    def test_06_add_second_hero_fight(self, resources, test_data):
+    def test_06_add_second_hero_fight(self, config, test_data):
         """
         Add Second hero to fight
-        :param resources
+        :param config
         :param test_data
         :return:
         """
-        url = urljoin(resources.baseUrl, resources.addHero)
+        url = urljoin(config['baseUrl'], 'fight/addHero')
         headers = {
-            'Authorization': resources.token
+            'Authorization': test_data['token']
         }
         body = {
             "heroId": test_data['heroes'][1]['id'],
@@ -125,27 +127,29 @@ class TestHeroes:
         if 'Yippie!' not in response['message']:
             raise Exception(f"{test_data['heroes'][1]['name']} did not get added !!")
 
-    def test_07_start_fight_with_two_heroes(self, resources):
+    def test_07_start_fight_with_two_heroes(self, config, test_data):
         """
         Start fight with 2 heroes
-        :param resources
+        :param config
+        :param test_data
         :return:
         """
-        url = urljoin(resources.baseUrl, resources.fight)
+        url = urljoin(config['baseUrl'], 'fight')
         headers = {
-            'Authorization': resources.token
+            'Authorization': test_data['token']
         }
         response = send_post_request(url, json=None, headers=headers)
 
-    def test_08_reset_fight(self, resources):
+    def test_08_reset_fight(self, config, test_data):
         """
         Reset Fight
-        :param resources
+        :param config
+        :param test_data
         :return:
         """
-        url = urljoin(resources.baseUrl, resources.fight)
+        url = urljoin(config['baseUrl'], 'fight')
         headers = {
-            'Authorization': resources.token
+            'Authorization': test_data['token']
         }
         response = send_delete_request(url, headers=headers)
         is_key_there_in_dict('message', response)
