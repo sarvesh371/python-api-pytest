@@ -1,16 +1,17 @@
 __author__ = "sarvesh.singh"
 
-from base.common import read_json_file, read_sample_json, update_allure_environment, computing_test_result, send_slack_webhook
+from base.common import read_sample_json, update_allure_environment, computing_test_result, \
+    send_slack_webhook
 
 import os
 import pytest
-from pathlib import Path
 from json import (
     dumps as json_dumps,
     load as json_load,
-    loads as json_loads,
-    JSONDecodeError,
 )
+
+# Global variable
+results = list()
 
 
 def pytest_addoption(parser):
@@ -19,7 +20,7 @@ def pytest_addoption(parser):
     :param parser:
     :return:
     """
-    parser.addoption("--server", action="store", default='qa', help="Environment")
+    parser.addoption("--env", action="store", default='local', help="Environment")
     parser.addoption("--report", action="store_true", default=False, help="Send Result")
 
 
@@ -67,9 +68,9 @@ def config(request):
     :return:
     """
     config = dict()
-    if request.config.getoption("--server") == 'qa':
+    if request.config.getoption("--env") == 'local':
         config.update({
-            'baseUrl': 'https://'
+            'baseUrl': 'http://localhost:3000'
         })
     return config
 
@@ -93,6 +94,7 @@ def test_data():
     """
     test_data = dict()
     return test_data
+
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -120,12 +122,11 @@ def pytest_runtest_makereport(item, call):
             }
         global results
         results.append(result)
+        # saving each test case result
+        with open("results.json", "w+") as _fp:
+            _fp.write(json_dumps(results, default=lambda o: o.__dict__, indent=2, sort_keys=True))
     elif report.when == 'teardown':
         pass
-
-    # saving each test case result
-    with open("results.json", "w+") as _fp:
-        _fp.write(json_dumps(results, default=lambda o: o.__dict__, indent=2, sort_keys=True))
 
 
 @pytest.fixture(autouse=True, scope="session")
