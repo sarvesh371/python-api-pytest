@@ -2,6 +2,7 @@ __author__ = "sarvesh.singh"
 
 import logging
 import os
+import string
 import uuid
 import zipfile
 from functools import wraps
@@ -278,11 +279,11 @@ def create_curl_command(method, headers, url, params=None, data=None):
 
 def read_sample_json():
     """
-    This function read all .json file in test-data and return json in format of this {file_name: file_Json} .
+    This function read all .json file in sample-jsons and return json in format of this {file_name: file_Json} .
     :return:
     """
     _json_files = []
-    directory = "test-data"
+    directory = "sample-jsons"
     for root, dirs, file in os.walk(directory):
         for filename in file:
             if filename.endswith(".json"):
@@ -461,12 +462,14 @@ def update_allure_environment(request, config):
     :return:
     """
     _environment_params = dict()
-    for _to_add in ["JOB_NAME"]:
+    for _to_add in ["JOB_NAME", "BUILD_URL"]:
         if _to_add in os.environ:
             _environment_params[_to_add] = os.environ[_to_add]
 
     _environment_params.update({
-        "Base-URL": config['BaseUrl']
+        "Base-URL": config['baseUrl'],
+        "Environment": request.config.getoption("--env"),
+        "Send-Report": request.config.getoption("--report"),
     })
 
     allure_dir = request.config.getoption("--alluredir")
