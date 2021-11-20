@@ -36,7 +36,6 @@ PyJWT==1.7.1
 pylint==2.6.0
 pyOpenSSL==19.1.0
 pyparsing==2.4.7
-pypiwin32
 pytest==6.0.1
 pytest-cov==2.10.1
 pytest-env==0.6.2
