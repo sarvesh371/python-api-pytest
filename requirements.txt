@@ -1,6 +1,5 @@
 aiohttp==3.6.2
-allure-pytest==2.8.18
-allure-python-commons==2.8.18
+allure-pytest==2.8.29
 appdirs==1.4.4
 attrs==20.1.0
 curlify==2.2.1
@@ -9,6 +8,8 @@ decorator==4.4.2
 docutils==0.16
 Faker==4.1.2
 flaky==3.7.0
+Flask==1.1.2
+flask-ngrok==0.0.25
 json5==0.9.5
 jsondiff==1.2.0
 jsonpickle==1.4.1
@@ -35,6 +36,7 @@ PyJWT==1.7.1
 pylint==2.6.0
 pyOpenSSL==19.1.0
 pyparsing==2.4.7
+pypiwin32
 pytest==6.0.1
 pytest-cov==2.10.1
 pytest-env==0.6.2
@@ -44,6 +46,7 @@ pytest-instafail==0.4.2
 pytest-json==0.4.0
 pytest-json-report==1.2.1
 pytest-metadata==1.10.0
+pytest-rerunfailures==9.1.1
 python-dateutil==2.8.1
 python-dotenv==0.14.0
 pytz==2020.1

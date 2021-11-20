@@ -35,9 +35,11 @@ This is a framework repo for api automation using python with pytest
 **Project Structure**
 
 1. base - It contains all the common functions and workers functions
-2. resources - It contains all url configurations which will be used throughout the project
-3. tests - It contains the test class which needs to be triggered
-5. allure-results - folder to save our allure report
+2. docker - It contains the Dockerfile
+3. jenkins-pipeline - It contains the Jenkinsfile
+4. test-data - It contains the sample json bodies
+5. tests - It contains the test class which needs to be triggered
+6. allure-results - folder to save our allure report
 
    a. run `allure serve` to get the allure report on localhost
 

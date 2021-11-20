@@ -1,9 +1,16 @@
 __author__ = "sarvesh.singh"
 
-from base.common import read_json_file, read_sample_json
+from base.common import read_json_file, read_sample_json, update_allure_environment, computing_test_result, send_slack_webhook
+
 import os
 import pytest
 from pathlib import Path
+from json import (
+    dumps as json_dumps,
+    load as json_load,
+    loads as json_loads,
+    JSONDecodeError,
+)
 
 
 def pytest_addoption(parser):
@@ -12,7 +19,8 @@ def pytest_addoption(parser):
     :param parser:
     :return:
     """
-    parser.addoption("--base-url", action="store", default='http://localhost:3000', help="Base URL")
+    parser.addoption("--server", action="store", default='qa', help="Environment")
+    parser.addoption("--report", action="store_true", default=False, help="Send Result")
 
 
 def pytest_configure(config):
@@ -58,10 +66,23 @@ def config(request):
     :param request
     :return:
     """
-    config = {
-        'baseUrl': request.config.getoption("--base-url"),
-    }
+    config = dict()
+    if request.config.getoption("--server") == 'qa':
+        config.update({
+            'baseUrl': 'https://'
+        })
     return config
+
+
+@pytest.fixture(autouse=True)
+def set_allure_environment(request, config):
+    """
+    Fixture to set environment in allure report
+    :param request:
+    :param config:
+    :return:
+    """
+    update_allure_environment(request, config)
 
 
 @pytest.fixture(scope="session")
@@ -73,26 +94,66 @@ def test_data():
     test_data = dict()
     return test_data
 
-
-@pytest.fixture(scope="session")
-def tear_down_fixture(test_data):
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
     """
-    Tear down fixture
+    Fixture to get the result of test case
+    :param item:
+    :param call:
+    :return:
+    """
+    outcome = yield
+    report = outcome.get_result()
+    if report.when == 'setup':
+        pass
+    elif report.when == 'call':
+        if report.outcome == 'passed':
+            result = {
+                "testName": item.name,
+                "result": report.outcome,
+            }
+        else:
+            result = {
+                "testName": item.name,
+                "result": report.outcome,
+                'error': ''.join(call.excinfo.value.args),
+            }
+        global results
+        results.append(result)
+    elif report.when == 'teardown':
+        pass
+
+    # saving each test case result
+    with open("results.json", "w+") as _fp:
+        _fp.write(json_dumps(results, default=lambda o: o.__dict__, indent=2, sort_keys=True))
+
+
+@pytest.fixture(autouse=True, scope="session")
+def tear_down_fixture(test_data, request):
+    """
+    Tear down fixture and send Slack message
     :param test_data: Test Data Fixture
+    :param request: pytest request
     """
     yield
-    test_data['summary'] = dict()
-    test_data['summary']['status'] = 'Pass'
-    path = Path(__file__).parent / "report.json"
-    report = read_json_file(path, nt=True)
-    test_data['summary']['total'] = report.summary.collected
-    test_data['summary']['failed'] = report.summary.failed
-    test_data['summary']['passed'] = report.summary.total - report.summary.failed
-    if bool(test_data['summary']['failed']):
-        test_data['summary']['status'] = 'Fail'
+    # dump test_data.json
+    with open("test_data.json", "w+") as _fp:
+        _fp.write(json_dumps(test_data, default=lambda o: o.__dict__, indent=2, sort_keys=True))
+
+    # collecting test results
+    with open('results.json', "r") as _fp:
+        result = json_load(_fp)
+
+    # computing test result
+    status, total_tests, executed, passed = computing_test_result(request=request, result=result)
+
+    # Sending slack message
+    if request.config.getoption("--report"):
+        allure_link = f"{os.environ.get('BUILD_URL')}allure"
+        send_slack_webhook(status, total_tests, executed, passed, allure_link)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(autouse=True, scope="session")
 def sample_json():
     """
     Fetch all sample json and convert it to name tuple .

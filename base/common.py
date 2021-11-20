@@ -1,6 +1,10 @@
 __author__ = "sarvesh.singh"
 
+import logging
 import os
+import uuid
+import zipfile
+from functools import wraps
 from urllib.parse import urlparse, urlunparse
 import re
 import requests
@@ -14,6 +18,8 @@ from types import SimpleNamespace as Namespace
 from collections import namedtuple
 import allure
 from datetime import datetime
+import time
+import sys
 import pytz
 import random
 from faker import Faker
@@ -95,7 +101,9 @@ def send_get_request(url, headers=None, params=None, timeout=None):
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
-    if isinstance(content, dict):
+    if url.split('/')[2] in ['hooks.slack.com']:
+        nt = json_loads(json_dumps(content))
+    elif isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
         nt = json_loads(content)
@@ -122,7 +130,9 @@ def send_post_request(url, headers, json=None, data=None, params=None):
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
-    if isinstance(content, dict):
+    if url.split('/')[2] in ['hooks.slack.com']:
+        nt = json_loads(json_dumps(content))
+    elif isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
         nt = json_loads(content)
@@ -149,7 +159,9 @@ def send_put_request(url, headers, json=None, data=None, params=None):
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
-    if isinstance(content, dict):
+    if url.split('/')[2] in ['hooks.slack.com']:
+        nt = json_loads(json_dumps(content))
+    elif isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
         nt = json_loads(content)
@@ -174,14 +186,16 @@ def send_delete_request(url, headers, params=None):
         raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
-    if isinstance(content, dict):
+    if url.split('/')[2] in ['hooks.slack.com']:
+        nt = json_loads(json_dumps(content))
+    elif isinstance(content, dict):
         nt = json_loads(json_dumps(content))
     else:
         nt = json_loads(content)
     return nt
 
 
-def save_allure(data, name, save_dump=True):
+def save_allure(data, name, save_dump=False):
     """
     Save allure report by converting data to Json
     :param data:
@@ -280,7 +294,7 @@ def read_sample_json():
             with open(_file, "r") as _fp:
                 try:
                     _file_content = json_load(_fp)
-                except (Exception, JSONDecodeError) as exp:
+                except (Exception, JSONDecodeError):
                     raise Exception(f"Cannot Read File {_file} !!")
             final_data.update(
                 {os.path.basename(_file).split(".json")[0]: _file_content}
@@ -290,3 +304,176 @@ def read_sample_json():
         return files
     else:
         raise Exception("There's no Json File in {directory} !!")
+
+
+def random_alpha_numeric_string(length=10):
+    """
+    Generate random alpha numeric string
+    :param length:
+    :return:
+    """
+    alpha_numeric_string = "".join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(length)
+    )
+    return alpha_numeric_string
+
+
+def zip_dir(directory_path, zip_name):
+    """
+    Func to create zip of directory
+    :param directory_path:
+    :param zip_name:
+    :return:
+    """
+    zip_file = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED)
+    for root, dirs, files in os.walk(directory_path):
+        for file in files:
+            zip_file.write(os.path.join(root, file))
+    zip_file.close()
+
+
+def computing_test_result(request, result):
+    """
+    Func to compute test result
+    :param request:
+    :param result:
+    :return:
+    """
+    status = 'Pass'
+    total_tests = len(request.node.items)
+    executed = len(result)
+    passed = len([x for x in result if x['result'] == 'passed'])
+    failure_reason = ''.join([x['error'] for x in result if x['result'] == 'failed'])
+    if failure_reason:
+        status = 'Fail'
+    return status, total_tests, executed, passed
+
+
+def send_slack_webhook(status, total_tests, executed, passed, allure_link):
+    """
+    Func to send slack message using webhook
+    :param status:
+    :param total_tests:
+    :param executed:
+    :param passed:
+    :param allure_link:
+    :return:
+    """
+    slack_url = 'https://hooks.slack.com/services/'
+    headers = {
+        'content-type': 'application/json'
+    }
+    message = {
+        "channel": "",
+        "attachments": [
+            {
+                "mrkdwn_in": [
+                    "text"
+                ],
+                "color": "#36a64f",
+                "pretext": "",
+                "author_name": "",
+                "fields": [
+                    {
+                        "title": "Result",
+                        "value": f"Status = {status}\nTotal Tests = {total_tests}\nExecuted = {executed}\n"
+                                 f"Passed = {passed}\nReport = {allure_link}",
+                        "short": False
+                    }
+                ],
+                "footer": "Automation Update",
+                "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+            }
+        ]
+    }
+    if status == 'Fail':
+        message['attachments'][0]['color'] = '#FF0002'
+    send_post_request(url=slack_url, headers=headers, json=message)
+
+
+def basic_logging(name="BASIC", level=None):
+    """
+    Basic Logger to log in a file
+    :param name
+    :param level
+    """
+    if level is None:
+        level = os.environ.get("LOG_LEVEL", "INFO")
+    root = logging.getLogger(name=name)
+    root.setLevel(getattr(logging, level))
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(getattr(logging, level))
+    formatter = logging.Formatter("%(levelname)s :: %(message)s")
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
+    return root
+
+
+def retry(retries=120, interval=5):
+    """
+    Decorator to retry if a test needs polling
+    :param retries:
+    :param interval:
+    :return:
+    """
+    # generate logger pointer
+    logger = basic_logging(name="BASIC", level=None)
+
+    def deco(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            r = retries
+            final_exception = None
+            while r > 0:
+                try:
+                    response = func(*args, **kwargs)
+                except Exception as exp:
+                    r -= 1
+                    logger.info(f"{exp} :: {r} of {retries} Retries Left !!")
+                    time.sleep(interval)
+                    final_exception = exp
+                    pass
+                else:
+                    break
+            else:
+                logger.error(final_exception)
+                raise Exception(f"{retries} Retries Exhausted :: {final_exception} !!")
+            return response
+
+        return wrapper
+
+    return deco
+
+
+def guid():
+    """
+    Func to generate random GUID
+    :return:
+    """
+    return str(uuid.uuid4())
+
+
+def update_allure_environment(request, config):
+    """
+    Func to update allure environment
+    :param request
+    :param config
+    :return:
+    """
+    _environment_params = dict()
+    for _to_add in ["JOB_NAME"]:
+        if _to_add in os.environ:
+            _environment_params[_to_add] = os.environ[_to_add]
+
+    _environment_params.update({
+        "Base-URL": config['BaseUrl']
+    })
+
+    allure_dir = request.config.getoption("--alluredir")
+    if allure_dir:
+        if not os.path.isdir(allure_dir):
+            os.makedirs(allure_dir)
+        env_file = os.path.join(allure_dir, "environment.properties")
+        with open(env_file, "w") as fd:
+            for _element in sorted(_environment_params.keys()):
+                fd.write(f"{_element}={_environment_params[_element]}\n")

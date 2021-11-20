@@ -1,0 +1,68 @@
+environments = ['qa', 'regression']
+
+properties([
+    buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '25')),
+    parameters([
+        choice(choices: environments.unique().sort().join('\n'), description: 'Environments to run', name: 'environment'),
+        string(defaultValue: 'master', description: "Branch", name: 'branch'),
+    ])
+])
+
+branch = (params.branch == null) ? 'master' : params.branch.toString().trim().replaceAll('"', '').toLowerCase()
+environment = (params.environment == null) ? 'qa' : params.environment.toString().trim().replaceAll('"', '')
+repo = 'https://'
+currentBuild.displayName = "$BUILD_NUMBER - "
+
+node('master') {
+    deleteDir()
+    timeout(time: 1, unit: 'HOURS') {
+        try {
+            stage ('Git Clone') {
+                cloneRepo(repo, branch)
+            }
+            withDockerContainer(image: 'sarvesh030195/python-automation:v1', args: '--name test') {
+                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                    stage ('Setup Environment') {
+                        setupVenv()
+                    }
+                    stage ('Running Tests') {
+                        sh """
+                            . venv/bin/activate
+                            python3 -u -m pytest tests --server ${environment} --report
+                            deactivate
+                        """
+                    }
+                }
+            }
+        } catch(e) {
+            print(e)
+            sh "docker rmi sarvesh030195/python-automation:v1"
+            currentBuild.result = "FAILURE"
+        } finally {
+            archiveArtifacts allowEmptyArchive: true, artifacts: '*.json'
+            stage ('Allure Report') {
+                allure jdk: '', results: [[path: 'allure-results']]
+            }
+        }
+    }
+}
+
+def cloneRepo(repo, branch) {
+    checkout([
+        $class: 'GitSCM',
+        branches: [[name: branch]],
+        extensions: [[$class: 'CleanCheckout']],
+        userRemoteConfigs: [[ url: repo]]
+    ])
+}
+
+def setupVenv() {
+    sh """
+        export PYTHONHTTPSVERIFY=0
+        python3 -m venv venv
+        . venv/bin/activate
+        python3 -m pip install --quiet --no-cache-dir --upgrade pip
+        python3 -m pip install --quiet --requirement requirements.txt
+        deactivate
+    """
+}
