@@ -1,7 +1,7 @@
 __author__ = "sarvesh.singh"
 
 import pytest
-from base.common import urljoin, send_get_request, is_key_there_in_dict, send_post_request, send_delete_request
+from utils.common import urljoin, send_get_request, is_key_there_in_dict, send_post_request, send_delete_request
 
 
 @pytest.mark.HEROES
