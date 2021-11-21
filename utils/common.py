@@ -24,6 +24,7 @@ import sys
 import pytz
 import random
 from faker import Faker
+from pathlib import Path
 
 
 def urljoin(*args):
@@ -480,3 +481,12 @@ def update_allure_environment(request, config):
         with open(env_file, "w") as fd:
             for _element in sorted(_environment_params.keys()):
                 fd.write(f"{_element}={_environment_params[_element]}\n")
+
+                
+def get_env_mapping(nt=False):
+    """
+    Function to Read Environment Mapping File
+    """
+    data = Path(__file__).parent.parent / "sample-jsons/envMapping.json"
+    return read_json_file(data, nt=nt)
+
