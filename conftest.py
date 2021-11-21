@@ -1,9 +1,12 @@
 __author__ = "sarvesh.singh"
 
-from base.common import read_sample_json, update_allure_environment, computing_test_result, \
-    send_slack_webhook
+from utils.common import read_sample_json, update_allure_environment, computing_test_result, \
+    send_slack_webhook, get_env_mapping
 
 import os
+from utils.logger import Logger
+from utils.database import Database
+from collections import namedtuple
 import pytest
 from json import (
     dumps as json_dumps,
@@ -12,6 +15,8 @@ from json import (
 
 # Global variable
 results = list()
+
+logger = Logger(name="CONF").get_logger
 
 
 def pytest_addoption(parser):
@@ -68,10 +73,11 @@ def config(request):
     :return:
     """
     config = dict()
-    if request.config.getoption("--env") == 'local':
-        config.update({
-            'baseUrl': 'http://localhost:3000'
-        })
+    _env_mapping = get_env_mapping()
+    _env = request.config.getoption("--env")
+    config['baseUrl'] = _env_mapping[_env]['baseUrl']
+    config['database'] = dict()
+    config['database'] = _env_mapping[_env]['database']
     return config
 
 
@@ -162,3 +168,31 @@ def sample_json():
     """
     json_data = read_sample_json()
     return json_data
+
+
+@pytest.fixture(scope="session")
+def db_connect(config):
+    """
+    Connect to Database
+    :param config:
+    :return:
+    """
+    logger.debug(f"Connecting to Database")
+    named_tuple = namedtuple("db", ["db_name"])
+    details = f"{config['database']['db_name']['host']} {config['database']['db_name']['port']} " \
+              f"{config['database']['db_name']['username']} {config['database']['db_name']['password']}"
+    logger.debug(details)
+
+    try:
+        db = Database(
+            host=config['database']['db_name']['host'],
+            username=config['database']['db_name']['username'],
+            password=config['database']['db_name']['password'],
+            database="db_name",
+            port=config['database']['db_name']['port'],
+        )
+    except Exception as exp:
+        logger.error(exp)
+        raise Exception(f"Unable to connect to db_name DB {details}")
+
+    return named_tuple(db_name=db)
