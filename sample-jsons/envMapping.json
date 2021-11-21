@@ -1,0 +1,36 @@
+{
+  "local": {
+    "baseUrl": "http://localhost:3000",
+    "database": {
+      "db_name": {
+        "host": "",
+        "port": "",
+        "username": "",
+        "password": ""
+      },
+      "db_name": {
+        "host": "",
+        "port": "",
+        "username": "",
+        "password": ""
+      }
+    }
+  },
+  "env_name": {
+    "baseUrl": "",
+    "database": {
+      "db_name": {
+        "host": "",
+        "port": "",
+        "username": "",
+        "password": ""
+      },
+      "db_name": {
+        "host": "",
+        "port": "",
+        "username": "",
+        "password": ""
+      }
+    }
+  }
+}
