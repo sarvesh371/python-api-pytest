@@ -5,8 +5,8 @@ from utils.common import read_sample_json, update_allure_environment, computing_
 
 import os
 from utils.logger import Logger
-from utils.database import Database
-from collections import namedtuple
+from utils.postgres import Postgres
+from utils.mysql import MySql
 import pytest
 from json import (
     dumps as json_dumps,
@@ -171,20 +171,19 @@ def sample_json():
 
 
 @pytest.fixture(scope="session")
-def db_connect(config):
+def db_postgres(config):
     """
     Connect to Database
     :param config:
     :return:
     """
     logger.debug(f"Connecting to Database")
-    named_tuple = namedtuple("db", ["db_name"])
     details = f"{config['database']['db_name']['host']} {config['database']['db_name']['port']} " \
               f"{config['database']['db_name']['username']} {config['database']['db_name']['password']}"
     logger.debug(details)
 
     try:
-        db = Database(
+        db = Postgres(
             host=config['database']['db_name']['host'],
             username=config['database']['db_name']['username'],
             password=config['database']['db_name']['password'],
@@ -195,4 +194,29 @@ def db_connect(config):
         logger.error(exp)
         raise Exception(f"Unable to connect to db_name DB {details}")
 
-    return named_tuple(db_name=db)
+    return db
+
+@pytest.fixture(scope="session")
+def db_mysql(config):
+    """
+    Connect to Database
+    :param config:
+    :return:
+    """
+    logger.debug(f"Connecting to Database")
+    details = f"{config['database']['contest']['host']} {config['database']['contest']['port']} " \
+              f"{config['database']['contest']['username']} {config['database']['contest']['password']}"
+    logger.debug(details)
+    
+    try:
+        db = MySql(
+            host=config['database']['contest']['host'],
+            username=config['database']['contest']['username'],
+            password=config['database']['contest']['password'],
+            database="db_name",
+        )
+    except Exception as exp:
+        logger.error(exp)
+        raise Exception(f"Unable to connect to db_name DB {details}")
+
+    return db
