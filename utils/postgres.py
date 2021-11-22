@@ -6,7 +6,7 @@ from psycopg2.extras import RealDictCursor
 from utils.logger import Logger
 
 
-class Database:
+class Postgres:
     """
     DB Connector
     """
