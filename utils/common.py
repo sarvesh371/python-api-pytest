@@ -1,10 +1,10 @@
 __author__ = "sarvesh.singh"
 
-import logging
 import os
 import string
 import uuid
 import zipfile
+import subprocess
 from functools import wraps
 from urllib.parse import urlparse, urlunparse
 import re
@@ -15,16 +15,18 @@ from json import (
     loads as json_loads,
     JSONDecodeError,
 )
+from utils.logger import Logger
 from types import SimpleNamespace as Namespace
 from collections import namedtuple
 import allure
 from datetime import datetime
 import time
-import sys
 import pytz
 import random
 from faker import Faker
 from pathlib import Path
+
+logger = Logger(name="COMMON").get_logger
 
 
 def urljoin(*args):
@@ -44,6 +46,7 @@ def read_json_file(file_name, nt=True):
     :param file_name
     :param nt
     """
+    logger.debug(f"Reading json file {file_name}")
     if not os.path.isfile(file_name):
         raise Exception(f"File {file_name} Does Not Exist !!")
 
@@ -100,7 +103,8 @@ def send_get_request(url, headers=None, params=None, timeout=None):
         response = requests.get(url=url, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
-        raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
+        logger.error(f"Status code is : {response.status_code} | Error: {response.text}")
+        raise Exception(f'Status code is : {response.status_code} | Error: {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
     if url.split('/')[2] in ['hooks.slack.com']:
@@ -129,7 +133,8 @@ def send_post_request(url, headers, json=None, data=None, params=None):
     response = requests.post(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
-        raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
+        logger.error(f"Status code is : {response.status_code} | Error: {response.text}")
+        raise Exception(f'Status code is : {response.status_code} | Error: {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
     if url.split('/')[2] in ['hooks.slack.com']:
@@ -158,7 +163,8 @@ def send_put_request(url, headers, json=None, data=None, params=None):
     response = requests.put(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
-        raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
+        logger.error(f"Status code is : {response.status_code} | Error: {response.text}")
+        raise Exception(f'Status code is : {response.status_code} | Error: {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
     if url.split('/')[2] in ['hooks.slack.com']:
@@ -185,7 +191,8 @@ def send_delete_request(url, headers, params=None):
     response = requests.delete(url=url, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
-        raise Exception(f'Status code is : {response.status_code} | Error : {response.text}')
+        logger.error(f"Status code is : {response.status_code} | Error: {response.text}")
+        raise Exception(f'Status code is : {response.status_code} | Error: {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
     if url.split('/')[2] in ['hooks.slack.com']:
@@ -393,24 +400,6 @@ def send_slack_webhook(status, total_tests, executed, passed, allure_link):
     send_post_request(url=slack_url, headers=headers, json=message)
 
 
-def basic_logging(name="BASIC", level=None):
-    """
-    Basic Logger to log in a file
-    :param name
-    :param level
-    """
-    if level is None:
-        level = os.environ.get("LOG_LEVEL", "INFO")
-    root = logging.getLogger(name=name)
-    root.setLevel(getattr(logging, level))
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(getattr(logging, level))
-    formatter = logging.Formatter("%(levelname)s :: %(message)s")
-    handler.setFormatter(formatter)
-    root.addHandler(handler)
-    return root
-
-
 def retry(retries=120, interval=5):
     """
     Decorator to retry if a test needs polling
@@ -418,8 +407,6 @@ def retry(retries=120, interval=5):
     :param interval:
     :return:
     """
-    # generate logger pointer
-    logger = basic_logging(name="BASIC", level=None)
 
     def deco(func):
         @wraps(func)
@@ -469,7 +456,7 @@ def update_allure_environment(request, config):
 
     _environment_params.update({
         "Base-URL": config['baseUrl'],
-        "Environment": request.config.getoption("--env"),
+        "Infra": request.config.getoption("--infra"),
         "Send-Report": request.config.getoption("--report"),
     })
 
@@ -482,7 +469,7 @@ def update_allure_environment(request, config):
             for _element in sorted(_environment_params.keys()):
                 fd.write(f"{_element}={_environment_params[_element]}\n")
 
-                
+
 def get_env_mapping(nt=False):
     """
     Function to Read Environment Mapping File
@@ -490,3 +477,40 @@ def get_env_mapping(nt=False):
     data = Path(__file__).parent.parent / "sample-jsons/envMapping.json"
     return read_json_file(data, nt=nt)
 
+
+def run_cmd(cmd, wait=True, fail=True, cwd=None, env=None):
+    """
+    Run a command and return it's output
+    :param cmd: command to be executed
+    :param fail: Fail execution when command is not a success
+    :param wait: Wait for process to complete?
+    :param cwd: Current Working DIR
+    :param env: Environment Variables to be set
+    :return:
+    """
+    cmd_response = namedtuple("CmdResponse", ["cmd", "status", "output", "error"])
+    cmd_env = os.environ.copy()
+    if env and isinstance(env, dict):
+        for key, value in env.items():
+            cmd_env[key] = str(value)
+
+    options = {"capture_output": True, "env": cmd_env, "shell": True, "universal_newlines": True}
+    if cwd:
+        options['cwd'] = cwd
+
+    now = datetime.now(pytz.timezone("Asia/Calcutta"))
+    name = f"command_{now.minute}{now.second}{now.microsecond}.txt"
+    save_allure(data=cmd, name=name, save_dump=False)
+
+    if not wait:
+        subprocess.Popen([cmd], shell=True, stdin=None, stdout=None, stderr=None)
+        return cmd_response(cmd=cmd, status=0, output=None, error=None)
+
+    p = subprocess.run(cmd, **options)
+    status = p.returncode
+    if fail and status != 0:
+        logger.error(f"Command '{cmd}' failed with code:{status}\n{p.stderr.strip()}")
+        save_allure(data=cmd, name='failOutput.txt', save_dump=False)
+        raise Exception(f"Command '{cmd}' failed with code:{status}\n{p.stderr.strip()}")
+
+    return cmd_response(cmd=cmd, status=status, output=p.stdout.strip(), error=p.stderr.strip())
