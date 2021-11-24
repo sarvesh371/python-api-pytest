@@ -456,7 +456,6 @@ def update_allure_environment(request, config):
 
     _environment_params.update({
         "Base-URL": config['baseUrl'],
-        "Infra": request.config.getoption("--infra"),
         "Send-Report": request.config.getoption("--report"),
     })
 
