@@ -7,6 +7,7 @@ import os
 from utils.logger import Logger
 from utils.postgres import Postgres
 from utils.mysql import MySql
+from utils.k8 import K8
 import pytest
 from json import (
     dumps as json_dumps,
@@ -169,6 +170,17 @@ def sample_json():
     json_data = read_sample_json()
     return json_data
 
+
+@pytest.fixture(scope="session")
+def k8(config):
+    """
+    Setup and Connect to K8
+    :param config:
+    :return:
+    """
+    logger.debug("Connecting to K8")
+    K8()
+    
 
 @pytest.fixture(scope="session")
 def db_postgres(config):
