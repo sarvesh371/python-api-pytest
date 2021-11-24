@@ -13,11 +13,9 @@ class K8:
     Class for Kubernetes !!
     """
 
-    def __init__(self, config=None, region='us-east-1'):
+    def __init__(self):
         """
         Connect to K8 Cluster
-        :param config:
-        :param region:
         """
         # Load kube Config
         kubernetes.config.load_kube_config()
