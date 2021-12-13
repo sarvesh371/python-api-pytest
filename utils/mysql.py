@@ -1,7 +1,9 @@
-__author__ = "sarvesh.singh"
+__author__ = 'sarvesh.singh'
 
 from utils.logger import Logger
 import mysql.connector
+
+logger = Logger(name='MYSQL').get_logger
 
 
 class MySql:
@@ -9,27 +11,23 @@ class MySql:
     MySql Connector for Devx
     """
 
-    def __init__(self, host, username, password, database=None, port=None):
+    def __init__(self, host, username, password, database=None):
         """
         Connect to database and provide it's marker
         :param host:
         :param username:
         :param password:
         :param database:
-        :param port:
         """
-        self.host = host
-        self.port = port
-        self.logger = Logger(name="DB").get_logger
-        if self.port is None:
-            self.port = 5432
-        self.username = username
-        self.password = password
-        self.database = database
+        logger.debug('Connecting to mysql !!')
+        self._host = host
+        self._username = username
+        self._password = password
+        self._database = database
 
         # variables
-        self.connection = None
-        self.connection_cursor = None
+        self._connection = None
+        self._connection_cursor = None
         self._connect_to_db()
 
     def _connect_to_db(self):
@@ -37,16 +35,16 @@ class MySql:
         Function to connect to db
         :return:
         """
-        self.logger.debug(
-            f"Making Connection to DB with {self.username} {self.password} {self.host} {self.port} {self.database}"
+        logger.debug(
+            f'Making Connection to DB with {self._username} {self._password} {self._host} {self._database}'
         )
-        self.connection = mysql.connector.connect(
-            host=self.host,
-            user=self.username,
-            password=self.password,
-            database=self.database
+        self._connection = mysql.connector.connect(
+            host=self._host,
+            user=self._username,
+            password=self._password,
+            database=self._database
         )
-        self.connection_cursor = self.connection.cursor()
+        self._connection_cursor = self._connection.cursor()
 
     def run_query(self, query):
         """
@@ -54,8 +52,8 @@ class MySql:
         :param query:
         :return:
         """
-        self.logger.debug(f"Running SQL Query {query} but not fetching data ...")
-        self.connection_cursor.execute(query)
+        logger.debug(f'Running SQL Query {query} but not fetching data ...')
+        self._connection_cursor.execute(query)
 
     def run_and_fetch_data(self, query):
         """
@@ -63,9 +61,9 @@ class MySql:
         :param query:
         :return:
         """
-        self.logger.debug(f"Running SQL Query {query} and fetching data ...")
-        self.connection_cursor.execute(query)
-        return self.connection_cursor.fetchall()
+        logger.debug(f'Running SQL Query {query} and fetching data ...')
+        self._connection_cursor.execute(query)
+        return self._connection_cursor.fetchall()
 
     def delete_data_query(self, table, condition):
         """
@@ -74,9 +72,10 @@ class MySql:
         :param condition:
         :return:
         """
-        sql = f"DELETE FROM {table} WHERE {condition}"
-        self.connection_cursor.execute(sql)
-        self.connection.commit()
+        sql = f'DELETE FROM {table} WHERE {condition}'
+        logger.debug(f'Running Delete Query {sql}')
+        self._connection_cursor.execute(sql)
+        self._connection.commit()
 
     def insert_columns(self, query, values):
         """
@@ -84,5 +83,5 @@ class MySql:
         :param query:
         :return:
         """
-        self.connection_cursor(query, values)
-        self.connection.commit()
+        self._connection_cursor(query, values)
+        self._connection.commit()
