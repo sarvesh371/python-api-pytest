@@ -32,5 +32,14 @@
         "password": ""
       }
     }
+  },
+  "jenkins": {
+    "baseUrl": "https://",
+    "token": ""
+  },
+  "testRail": {
+    "url": "https://.io/",
+    "email": "",
+    "password": ""
   }
 }
