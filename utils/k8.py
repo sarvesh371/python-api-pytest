@@ -11,13 +11,11 @@ class K8:
     Class for Kubernetes !!
     """
 
-    def __init__(self, region='us-east-1'):
+    def __init__(self):
         """
         Connect to K8 Cluster
-        :param region:
         """
         logger.debug('Connecting to k8 !!')
-        self._region = region
         self._aws_keys = None
 
         # Load kube Config
