@@ -73,7 +73,7 @@ Running the pytest tests is very easy as it gets.
 1. Complete the framework setup step
 
 
-2. Activate the virtual environment source `venv/bin/activate` (run command inside python-api-pytest)
+2. Activate the virtual environment `source venv/bin/activate` (run command inside python-api-pytest)
 
 
 3. If you want to run the tests with default parameters passed in the source code, Just run `pytest tests` and the
