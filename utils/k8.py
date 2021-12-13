@@ -1,11 +1,9 @@
-__author__ = "sarvesh.singh"
+__author__ = 'sarvesh.singh'
 
-import os
 import kubernetes
 from utils.logger import Logger
-from utils.common import run_cmd, read_json_file
 
-logger = Logger(name="K8").get_logger
+logger = Logger(name='K8').get_logger
 
 
 class K8:
@@ -13,14 +11,19 @@ class K8:
     Class for Kubernetes !!
     """
 
-    def __init__(self):
+    def __init__(self, region='us-east-1'):
         """
         Connect to K8 Cluster
+        :param region:
         """
+        logger.debug('Connecting to k8 !!')
+        self._region = region
+        self._aws_keys = None
+
         # Load kube Config
         kubernetes.config.load_kube_config()
         self.client = kubernetes.client.CoreV1Api()
-        self.params = {"pretty": "pretty_example"}
+        self.params = {'pretty': 'pretty_example'}
 
     def get_all_pods(self, namespace=None, fetch_all=False):
         """
@@ -34,14 +37,14 @@ class K8:
             if fetch_all:
                 _pods.append(_pod.metadata.name)
             else:
-                if _pod.status.phase in ["Running", "Succeeded"]:
+                if _pod.status.phase in ['Running', 'Succeeded']:
                     _pods.append(_pod.metadata.name)
                 else:
                     logger.debug(
-                        f"{namespace} Pod {_pod.metadata.name} is in {_pod.status.phase} !!")
+                        f'{namespace} Pod {_pod.metadata.name} is in {_pod.status.phase} !!')
 
         if len(_pods) == 0:
-            raise Exception(f"Found Zero Pods for {namespace}- namespace !!")
+            raise Exception(f'Found Zero Pods for {namespace}- namespace !!')
 
         return _pods
 
@@ -56,7 +59,7 @@ class K8:
             _services.append(_service.metadata.name)
 
         if len(_services) == 0:
-            raise Exception(f"Found Zero Services for {namespace}- namespace !!")
+            raise Exception(f'Found Zero Services for {namespace}- namespace !!')
 
         return _services
 
@@ -69,12 +72,12 @@ class K8:
         :return:
         """
         if duration:
-            self.params["since_seconds"] = str(duration)
+            self.params['since_seconds'] = str(duration)
 
         try:
             logs = self.client.read_namespaced_pod_log(pod_name, namespace, **self.params)
         except (Exception, KeyError, ValueError):
-            logger.error(f"Failed to Get Pod: {pod_name} Logs !!")
+            logger.error(f'Failed to Get Pod: {pod_name} Logs !!')
             return []
 
         return logs
