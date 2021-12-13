@@ -1,4 +1,4 @@
-__author__ = "sarvesh.singh"
+__author__ = 'sarvesh.singh'
 
 import logging
 import logging.handlers
@@ -14,16 +14,16 @@ class CustomConsoleFormatter(logging.Formatter):
     """
 
     def __init__(self):
-        super().__init__(fmt="{levelname} :: {message}", datefmt=None, style="{")
+        super().__init__(fmt='{levelname} :: {message}', datefmt=None, style='{')
 
     def format(self, record):
         # Remember the original format
         format_orig = self._style._fmt
 
         if record.levelno == logging.INFO:
-            self._style._fmt = "{levelname} -> {message}"
+            self._style._fmt = '{levelname} -> {message}'
         else:
-            self._style._fmt = "{filename} {lineno} {levelname} -> {message}"
+            self._style._fmt = '{filename} {lineno} {levelname} -> {message}'
 
         result = logging.Formatter.format(self, record)
 
@@ -39,7 +39,7 @@ class Logger:
     # "%(asctime)s %(name)3s %(levelname)-8s %(filename)13s: %(lineno)4d :: %(message)s")
     """
 
-    def __init__(self, name="Automation", level=None):
+    def __init__(self, name='Automation', level=None):
         """
         Init Function for Logging
         :param name:
@@ -47,17 +47,17 @@ class Logger:
         """
         self.name = str(name).upper()
         self.mappings = {
-            "DEBUG": logging.DEBUG,  # 10
-            "INFO": logging.INFO,  # 20
-            "WARNING": logging.WARN,  # 30
-            "WARN": logging.WARNING,  # 30
-            "ERROR": logging.ERROR,  # 40
-            "CRITICAL": logging.CRITICAL,  # 50
+            'DEBUG': logging.DEBUG,  # 10
+            'INFO': logging.INFO,  # 20
+            'WARNING': logging.WARN,  # 30
+            'WARN': logging.WARNING,  # 30
+            'ERROR': logging.ERROR,  # 40
+            'CRITICAL': logging.CRITICAL,  # 50
         }
 
         # Set Logging Level: First from environment else
         if level is None:
-            self.log_level = self.mappings[os.getenv("LOG_LEVEL", "INFO")]
+            self.log_level = self.mappings[os.getenv('LOG_LEVEL', 'INFO')]
         else:
             self.log_level = self.mappings[level]
 
