@@ -1,4 +1,4 @@
-__author__ = "sarvesh.singh"
+__author__ = 'sarvesh.singh'
 
 import os
 import string
@@ -22,11 +22,12 @@ import allure
 from datetime import datetime
 import time
 import pytz
+import base64
 import random
 from faker import Faker
 from pathlib import Path
 
-logger = Logger(name="COMMON").get_logger
+logger = Logger(name='COMMON').get_logger
 
 
 def urljoin(*args):
@@ -46,11 +47,11 @@ def read_json_file(file_name, nt=True):
     :param file_name
     :param nt
     """
-    logger.debug(f"Reading json file {file_name}")
+    logger.debug(f'Reading json file {file_name}')
     if not os.path.isfile(file_name):
-        raise Exception(f"File {file_name} Does Not Exist !!")
+        raise Exception(f'File {file_name} Does Not Exist !!')
 
-    with open(file_name, "r") as _fp:
+    with open(file_name, 'r') as _fp:
         if nt:
             data = json_load(_fp, object_hook=lambda d: Namespace(**d))
         else:
@@ -77,7 +78,7 @@ def is_key_there_in_dict(key, dictionary, empty_check=True, text=None):
         if empty_check:
             if isinstance(dictionary[key], (list, tuple, dict)):
                 if len(dictionary[key]) == 0:
-                    print(f"{key} is empty !!")
+                    print(f'{key} is empty !!')
             elif dictionary[key] is None:
                 pass
             else:
@@ -93,8 +94,8 @@ def send_get_request(url, headers=None, params=None, timeout=None):
     :param timeout:
     :return:
     """
-    now = datetime.now(pytz.timezone("Asia/Calcutta"))
-    name = f"curlCmd_{now.minute}{now.second}{now.microsecond}.json"
+    now = datetime.now(pytz.timezone('Asia/Calcutta'))
+    name = f'curlCmd_{now.minute}{now.second}{now.microsecond}.json'
     command = create_curl_command(method='GET', headers=headers, url=url, params=params)
     save_allure(data=command, name=name, save_dump=False)
     if timeout:
@@ -103,20 +104,18 @@ def send_get_request(url, headers=None, params=None, timeout=None):
         response = requests.get(url=url, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
-        logger.error(f"Status code is : {response.status_code} | Error: {response.text}")
+        logger.error(f'Status code is : {response.status_code} | Error: {response.text}')
         raise Exception(f'Status code is : {response.status_code} | Error: {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
-    if url.split('/')[2] in ['hooks.slack.com']:
-        nt = json_loads(json_dumps(content))
-    elif isinstance(content, dict):
-        nt = json_loads(json_dumps(content))
-    else:
+    try:
         nt = json_loads(content)
+    except:
+        nt = json_loads(json_dumps(content))
     return nt
 
 
-def send_post_request(url, headers, json=None, data=None, params=None):
+def send_post_request(url, headers=None, json=None, data=None, params=None):
     """
     Send simple Post Request
     :param url:
@@ -126,27 +125,25 @@ def send_post_request(url, headers, json=None, data=None, params=None):
     :param params:
     :return:
     """
-    now = datetime.now(pytz.timezone("Asia/Calcutta"))
-    name = f"curlCmd_{now.minute}{now.second}{now.microsecond}.json"
+    now = datetime.now(pytz.timezone('Asia/Calcutta'))
+    name = f'curlCmd_{now.minute}{now.second}{now.microsecond}.json'
     command = create_curl_command(method='POST', headers=headers, url=url, params=params, data=json)
     save_allure(data=command, name=name, save_dump=False)
     response = requests.post(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
-        logger.error(f"Status code is : {response.status_code} | Error: {response.text}")
+        logger.error(f'Status code is : {response.status_code} | Error: {response.text}')
         raise Exception(f'Status code is : {response.status_code} | Error: {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
-    if url.split('/')[2] in ['hooks.slack.com']:
-        nt = json_loads(json_dumps(content))
-    elif isinstance(content, dict):
-        nt = json_loads(json_dumps(content))
-    else:
+    try:
         nt = json_loads(content)
+    except:
+        nt = json_loads(json_dumps(content))
     return nt
 
 
-def send_put_request(url, headers, json=None, data=None, params=None):
+def send_put_request(url, headers=None, json=None, data=None, params=None):
     """
     Send simple Put Request
     :param url:
@@ -156,27 +153,25 @@ def send_put_request(url, headers, json=None, data=None, params=None):
     :param params:
     :return:
     """
-    now = datetime.now(pytz.timezone("Asia/Calcutta"))
-    name = f"curlCmd_{now.minute}{now.second}{now.microsecond}.json"
+    now = datetime.now(pytz.timezone('Asia/Calcutta'))
+    name = f'curlCmd_{now.minute}{now.second}{now.microsecond}.json'
     command = create_curl_command(method='PUT', headers=headers, url=url, params=params, data=json)
     save_allure(data=command, name=name, save_dump=False)
     response = requests.put(url=url, json=json, data=data, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
-        logger.error(f"Status code is : {response.status_code} | Error: {response.text}")
+        logger.error(f'Status code is : {response.status_code} | Error: {response.text}')
         raise Exception(f'Status code is : {response.status_code} | Error: {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
-    if url.split('/')[2] in ['hooks.slack.com']:
-        nt = json_loads(json_dumps(content))
-    elif isinstance(content, dict):
-        nt = json_loads(json_dumps(content))
-    else:
+    try:
         nt = json_loads(content)
+    except:
+        nt = json_loads(json_dumps(content))
     return nt
 
 
-def send_delete_request(url, headers, params=None):
+def send_delete_request(url, headers=None, params=None):
     """
     Send simple Delete Request
     :param url:
@@ -184,23 +179,21 @@ def send_delete_request(url, headers, params=None):
     :param params:
     :return:
     """
-    now = datetime.now(pytz.timezone("Asia/Calcutta"))
+    now = datetime.now(pytz.timezone('Asia/Calcutta'))
     name = f"curlCmd_{now.minute}{now.second}{now.microsecond}.json"
     command = create_curl_command(method='DELETE', headers=headers, url=url, params=params)
     save_allure(data=command, name=name, save_dump=False)
     response = requests.delete(url=url, headers=headers, params=params)
     if response.status_code not in [200, 201]:
         save_allure(data=response.content.decode('utf-8'), name='failResponse.json', save_dump=False)
-        logger.error(f"Status code is : {response.status_code} | Error: {response.text}")
+        logger.error(f'Status code is : {response.status_code} | Error: {response.text}')
         raise Exception(f'Status code is : {response.status_code} | Error: {response.text}')
     content = response.content.decode('utf-8')
     save_allure(data=content, name='passResponse.json', save_dump=False)
-    if url.split('/')[2] in ['hooks.slack.com']:
-        nt = json_loads(json_dumps(content))
-    elif isinstance(content, dict):
-        nt = json_loads(json_dumps(content))
-    else:
+    try:
         nt = json_loads(content)
+    except:
+        nt = json_loads(json_dumps(content))
     return nt
 
 
@@ -215,17 +208,17 @@ def save_allure(data, name, save_dump=False):
     """
     if len(data) != 0:
         if isinstance(data, str):
-            name = str(name).replace(".json", ".log")
+            name = str(name).replace('.json', '.log')
             allure.attach(data, name=name, attachment_type=allure.attachment_type.TEXT)
             if save_dump:
-                with open(name, "w") as _fp:
+                with open(name, 'w') as _fp:
                     _fp.write(data)
             return str
         else:
             dump = json_dumps(data, indent=2, sort_keys=True)
             allure.attach(dump, name=name, attachment_type=allure.attachment_type.JSON)
             if save_dump:
-                with open(name, "w") as _fp:
+                with open(name, 'w') as _fp:
                     _fp.write(dump)
             return dump
 
@@ -239,7 +232,7 @@ def generate_phone_number(max_digits=10):
     return random.randint(10 ** (max_digits - 1), 10 ** max_digits - 1)
 
 
-def generate_email_id(**kwargs):
+def generate_email_id():
     """
     Function to generate Email ID
     :return:
@@ -264,11 +257,11 @@ def create_curl_command(method, headers, url, params=None, data=None):
     # Check if data is in Json/dict format, convert it into string after that
     if isinstance(data, dict) or isinstance(data, list):
         data = json_dumps(data)
-    headers = " --header ".join(
+    headers = ' --header '.join(
         [
             f'"{k}: {v}"'
             for k, v in headers.items()
-            if k not in ["User-Agent", "Accept-Encoding"]
+            if k not in ['User-Agent', 'Accept-Encoding']
         ]
     )
 
@@ -281,7 +274,7 @@ def create_curl_command(method, headers, url, params=None, data=None):
         command = f"curl --request {method} --include --silent --show-error --header {headers} '{url}'"
 
     # We always save Curl Command in environment variable, so that we know (in-case) of an exception what was it.
-    os.environ["CURL"] = command
+    os.environ['CURL'] = command
     return command
 
 
@@ -290,25 +283,26 @@ def read_sample_json():
     This function read all .json file in sample-jsons and return json in format of this {file_name: file_Json} .
     :return:
     """
+    logger.debug('Reading all jsons under /sample-json dir !!')
     _json_files = []
-    directory = "sample-jsons"
+    directory = 'sample-jsons'
     for root, dirs, file in os.walk(directory):
         for filename in file:
-            if filename.endswith(".json"):
+            if filename.endswith('.json'):
                 _json_files.append(os.path.join(root, filename))
 
     if len(_json_files) != 0:
         final_data = {}
         for _file in _json_files:
-            with open(_file, "r") as _fp:
+            with open(_file, 'r') as _fp:
                 try:
                     _file_content = json_load(_fp)
                 except (Exception, JSONDecodeError):
-                    raise Exception(f"Cannot Read File {_file} !!")
+                    raise Exception(f'Cannot Read File {_file} !!')
             final_data.update(
-                {os.path.basename(_file).split(".json")[0]: _file_content}
+                {os.path.basename(_file).split('.json')[0]: _file_content}
             )
-        json_files = namedtuple("MyTuple", final_data)
+        json_files = namedtuple('MyTuple', final_data)
         files = json_files(**final_data)
         return files
     else:
@@ -321,7 +315,7 @@ def random_alpha_numeric_string(length=10):
     :param length:
     :return:
     """
-    alpha_numeric_string = "".join(
+    alpha_numeric_string = ''.join(
         random.choice(string.ascii_uppercase + string.digits) for _ in range(length)
     )
     return alpha_numeric_string
@@ -348,6 +342,7 @@ def computing_test_result(request, result):
     :param result:
     :return:
     """
+    logger.debug('Computing test result !!')
     status = 'Pass'
     total_tests = len(request.node.items)
     executed = len(result)
@@ -358,9 +353,11 @@ def computing_test_result(request, result):
     return status, total_tests, executed, passed
 
 
-def send_slack_webhook(status, total_tests, executed, passed, allure_link):
+def send_slack_message(channel=None, status=None, total_tests=None, executed=None, passed=None,
+                       allure_link=None):
     """
     Func to send slack message using webhook
+    :param channel:
     :param status:
     :param total_tests:
     :param executed:
@@ -368,6 +365,7 @@ def send_slack_webhook(status, total_tests, executed, passed, allure_link):
     :param allure_link:
     :return:
     """
+    logger.debug('Sending slack message !!')
     slack_url = 'https://hooks.slack.com/services/'
     headers = {
         'content-type': 'application/json'
@@ -380,8 +378,6 @@ def send_slack_webhook(status, total_tests, executed, passed, allure_link):
                     "text"
                 ],
                 "color": "#36a64f",
-                "pretext": "",
-                "author_name": "",
                 "fields": [
                     {
                         "title": "Result",
@@ -418,7 +414,7 @@ def retry(retries=120, interval=5):
                     response = func(*args, **kwargs)
                 except Exception as exp:
                     r -= 1
-                    logger.info(f"{exp} :: {r} of {retries} Retries Left !!")
+                    logger.debug(f'{exp} :: {r} of {retries} Retries Left !!')
                     time.sleep(interval)
                     final_exception = exp
                     pass
@@ -426,7 +422,7 @@ def retry(retries=120, interval=5):
                     break
             else:
                 logger.error(final_exception)
-                raise Exception(f"{retries} Retries Exhausted :: {final_exception} !!")
+                raise Exception(f'{retries} Retries Exhausted :: {final_exception} !!')
             return response
 
         return wrapper
@@ -450,7 +446,7 @@ def update_allure_environment(request, config):
     :return:
     """
     _environment_params = dict()
-    for _to_add in ["JOB_NAME", "BUILD_URL"]:
+    for _to_add in ['JOB_NAME', 'BUILD_URL']:
         if _to_add in os.environ:
             _environment_params[_to_add] = os.environ[_to_add]
 
@@ -459,21 +455,21 @@ def update_allure_environment(request, config):
         "Send-Report": request.config.getoption("--report"),
     })
 
-    allure_dir = request.config.getoption("--alluredir")
+    allure_dir = request.config.getoption('--alluredir')
     if allure_dir:
         if not os.path.isdir(allure_dir):
             os.makedirs(allure_dir)
-        env_file = os.path.join(allure_dir, "environment.properties")
-        with open(env_file, "w") as fd:
+        env_file = os.path.join(allure_dir, 'environment.properties')
+        with open(env_file, 'w') as fd:
             for _element in sorted(_environment_params.keys()):
-                fd.write(f"{_element}={_environment_params[_element]}\n")
+                fd.write(f'{_element}={_environment_params[_element]}\n')
 
 
 def get_env_mapping(nt=False):
     """
     Function to Read Environment Mapping File
     """
-    data = Path(__file__).parent.parent / "sample-jsons/envMapping.json"
+    data = Path(__file__).parent.parent / 'sample-jsons/envMapping.json'
     return read_json_file(data, nt=nt)
 
 
@@ -487,18 +483,18 @@ def run_cmd(cmd, wait=True, fail=True, cwd=None, env=None):
     :param env: Environment Variables to be set
     :return:
     """
-    cmd_response = namedtuple("CmdResponse", ["cmd", "status", "output", "error"])
+    cmd_response = namedtuple('CmdResponse', ['cmd', 'status', 'output', 'error'])
     cmd_env = os.environ.copy()
     if env and isinstance(env, dict):
         for key, value in env.items():
             cmd_env[key] = str(value)
 
-    options = {"capture_output": True, "env": cmd_env, "shell": True, "universal_newlines": True}
+    options = {'capture_output': True, 'env': cmd_env, 'shell': True, 'universal_newlines': True}
     if cwd:
         options['cwd'] = cwd
 
-    now = datetime.now(pytz.timezone("Asia/Calcutta"))
-    name = f"command_{now.minute}{now.second}{now.microsecond}.txt"
+    now = datetime.now(pytz.timezone('Asia/Calcutta'))
+    name = f'command_{now.minute}{now.second}{now.microsecond}.txt'
     save_allure(data=cmd, name=name, save_dump=False)
 
     if not wait:
@@ -509,7 +505,47 @@ def run_cmd(cmd, wait=True, fail=True, cwd=None, env=None):
     status = p.returncode
     if fail and status != 0:
         logger.error(f"Command '{cmd}' failed with code:{status}\n{p.stderr.strip()}")
-        save_allure(data=cmd, name='failOutput.txt', save_dump=False)
+        save_allure(data=f"Command '{cmd}' failed with code:{status}\n{p.stderr.strip()}", name='failOutput.txt',
+                    save_dump=False)
         raise Exception(f"Command '{cmd}' failed with code:{status}\n{p.stderr.strip()}")
 
     return cmd_response(cmd=cmd, status=status, output=p.stdout.strip(), error=p.stderr.strip())
+
+
+def base64_encode(_input=None):
+    """
+    Encode Base64
+    :param _input:
+    :return:
+    """
+    encoded = str(base64.b64encode(bytes(_input, 'utf-8')), 'ascii').strip()
+    return encoded
+
+
+def base64_decode(encoded=None):
+    """
+    Decode Base64
+    :param encoded:
+    :return:
+    """
+    decoded = str(base64.b64decode(encoded), 'ascii')
+    return decoded
+
+
+def compare_jsons(json_1=None, json_2=None):
+    """
+    Func to compare two jsons
+    :param json_1:
+    :param json_2:
+    :return:
+    """
+
+    def sorting(item):
+        if isinstance(item, dict):
+            return sorted((key, sorting(values)) for key, values in item.items())
+        if isinstance(item, list):
+            return sorted(sorting(x) for x in item)
+        else:
+            return item
+
+    return sorting(json_loads(json_dumps(json_1))) == sorting(json_loads(json_dumps(json_2)))
